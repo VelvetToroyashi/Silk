@@ -2,10 +2,11 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
+using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Data.MediatR.Users.History;
 using Silk.Services.Data;
@@ -16,16 +17,12 @@ namespace Silk.Responders;
 public class MemberDataCacherResponder //: IResponder<IGuildMemberAdd>, IResponder<IGuildMemberRemove>
 {
     private readonly IMediator               _mediator;
-    private readonly GuildConfigCacheService _config;
-    public MemberDataCacherResponder(IMediator mediator, GuildConfigCacheService config)
-    {
-        _mediator = mediator;
-        _config = config;
-    }
+    
+    public MemberDataCacherResponder(IMediator mediator) => _mediator = mediator;
 
     public async Task<Result> RespondAsync(IGuildMemberAdd gatewayEvent, CancellationToken ct = default)
     {
-        var config = await _config.GetConfigAsync(gatewayEvent.GuildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(gatewayEvent.GuildID), ct);
         
         if (!config.Logging.LogMemberJoins)
             return Result.FromSuccess();
@@ -40,7 +37,7 @@ public class MemberDataCacherResponder //: IResponder<IGuildMemberAdd>, IRespond
 
     public async Task<Result> RespondAsync(IGuildMemberRemove gatewayEvent, CancellationToken ct = default)
     {
-        var config = await _config.GetConfigAsync(gatewayEvent.GuildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(gatewayEvent.GuildID), ct);
         
         if (!config.Logging.LogMemberLeaves)
             return Result.FromSuccess();

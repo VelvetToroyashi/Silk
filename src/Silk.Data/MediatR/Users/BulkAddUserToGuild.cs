@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
@@ -29,14 +30,17 @@ public static class BulkAddUserToGuild
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public async Task<Unit> Handle(Request request, CancellationToken  cancellationToken)
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
+
+        public async ValueTask<Unit> Handle(Request request, CancellationToken  cancellationToken)
         {
-            
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
             var users         = request.Users.Select(u => new UserEntity
                                                          { ID       = u.ID });
@@ -45,9 +49,9 @@ public static class BulkAddUserToGuild
             var userHistories = request.Users.Select(u => new UserHistoryEntity
                                                          { UserID = u.ID, GuildID = request.GuildID, Date = u.JoinedAt, IsJoin = true });
             
-            await _db.Users.UpsertRange(users).On(u => u.ID).NoUpdate().RunAsync(cancellationToken);
-            await _db.GuildUsers.UpsertRange(guildUsers).On(gu => new { gu.UserID, gu.GuildID }).NoUpdate().RunAsync(cancellationToken);
-            await _db.Histories.UpsertRange(userHistories).On(u => new { u.UserID, u.GuildID, JoinDate = u.Date }).NoUpdate().RunAsync(cancellationToken);
+            await db.Users.UpsertRange(users).On(u => u.ID).NoUpdate().RunAsync(cancellationToken);
+            await db.GuildUsers.UpsertRange(guildUsers).On(gu => new { gu.UserID, gu.GuildID }).NoUpdate().RunAsync(cancellationToken);
+            await db.Histories.UpsertRange(userHistories).On(u => new { u.UserID, u.GuildID, JoinDate = u.Date }).NoUpdate().RunAsync(cancellationToken);
             
             return Unit.Value;
         }

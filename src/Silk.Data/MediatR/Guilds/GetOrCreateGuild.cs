@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using EFCoreSecondLevelCacheInterceptor;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.Entities;
@@ -19,22 +21,23 @@ public static class GetOrCreateGuild
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, GuildEntity>
     {
-        private readonly GuildContext _db;
         private readonly IMediator                       _mediator;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(GuildContext db, IMediator mediator)
+        public Handler(IDbContextFactory<GuildContext> dbFactory, IMediator mediator)
         {
-            _db       = db;
-            _mediator = mediator;
+            _dbFactory = dbFactory;
+            _mediator  = mediator;
         }
 
-        public async Task<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<GuildEntity> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            var guild = await _db.Guilds.FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
+            var guild = await db.Guilds.Cacheable().FirstOrDefaultAsync(g => g.ID == request.GuildID, cancellationToken);
 
             if (guild is not null)
                 return guild;

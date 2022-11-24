@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +30,6 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
         try
         {
             serviceCollection
-               .AddMediatR(typeof(RoleMenuPlugin))
                .AddResponder<RoleMenuButtonFixer>()
                .AddInteractionGroup<RoleMenuInteractionCommands>()
                .AddCommandTree()
@@ -39,6 +37,7 @@ public sealed class RoleMenuPlugin : PluginDescriptor, IMigratablePlugin
                .Finish()
                .AddCondition<RoleMenuCondition>()
                .AddParser<MessageLinkSnowflakeParser>()
+               .AddScoped<RoleMenuRepository>()
                .AddDbContext<RoleMenuContext>((s, b) =>
                 {
                     var config = s.GetRequiredService<IConfiguration>();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using EFCoreSecondLevelCacheInterceptor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -180,10 +181,15 @@ public static class ServiceCollectionExtensions
             b.UseNpgsql(connectionString);
 
             b.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            
         }
 
         EntityMapping.ConfigureMappings();
-        services.AddDbContextPool<GuildContext>(Builder, 256);
+        services.AddPooledDbContextFactory<GuildContext>(Builder, 256);
+        services.AddEFSecondLevelCache(options => options.UseMemoryCacheProvider(CacheExpirationMode.Sliding, TimeSpan.FromMinutes(15)).DisableLogging(true));
+        
+        //services.AddDbContextPool<GuildContext>(Builder, 256);
+       // services.AddDbContext<GuildContext>(Builder, ServiceLifetime.Transient);
 
         return services;
     }

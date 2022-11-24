@@ -19,18 +19,17 @@ namespace Silk.Commands.General;
 [Category(Categories.Misc)]
 public class PingCommand : CommandGroup
 {
-    private readonly GuildContext         _db;
-    private readonly MessageContext      _context;
-    private readonly DiscordGatewayClient _gateway;
-    
-    private readonly IDiscordRestChannelAPI _channels;
+    private readonly IDbContextFactory<GuildContext> _db;
+    private readonly MessageContext                  _context;
+    private readonly DiscordGatewayClient            _gateway;
+    private readonly IDiscordRestChannelAPI          _channels;
 
     public PingCommand
     (
-        GuildContext           db,
-        MessageContext         context,
-        DiscordGatewayClient   gateway,
-        IDiscordRestChannelAPI channels
+        IDbContextFactory<GuildContext> db,
+        MessageContext                  context,
+        DiscordGatewayClient            gateway,
+        IDiscordRestChannelAPI          channels
     )
     {
         _db       = db;
@@ -75,7 +74,7 @@ public class PingCommand : CommandGroup
         var apiLat = sw.ElapsedMilliseconds.ToString("N0");
 
         var messageLat = message.Entity.Timestamp - (_context.Message.EditedTimestamp.IsDefined(out var edit) ? edit.Value : _context.MessageID.Timestamp);
-
+        
         embed = embed with
         {
             Fields = new[]
@@ -94,8 +93,9 @@ public class PingCommand : CommandGroup
 
     private int GetDbLatency()
     {
-        var sw = Stopwatch.StartNew();
-        _db.Database.ExecuteSqlRaw("SELECT first_value(\"id\") OVER () FROM \"guilds\"");
+        using var db = _db.CreateDbContext();
+        var       sw = Stopwatch.StartNew();
+        db.Database.ExecuteSqlRaw("SELECT first_value(\"id\") OVER () FROM \"guilds\"");
         sw.Stop();
         return (int)sw.ElapsedMilliseconds;
     }

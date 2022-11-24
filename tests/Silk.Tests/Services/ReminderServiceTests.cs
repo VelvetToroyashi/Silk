@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -15,6 +15,7 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Reminders;
 using Silk.Services.Guild;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Tests.Services;
 

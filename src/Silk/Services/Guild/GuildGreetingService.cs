@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
@@ -15,9 +15,11 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Greetings;
+using Silk.Data.MediatR.Guilds;
 using Silk.Errors;
 using Silk.Services.Data;
 using Silk.Shared.Types;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Services.Guild;
 
@@ -27,33 +29,28 @@ public class GuildGreetingService : IHostedService
 
     private readonly AsyncTimer _timer;
     
-    private readonly GuildConfigCacheService       _config;
+    private readonly IMediator                     _mediator;
+    private readonly IShardIdentification          _shard;
+    private readonly IDiscordRestUserAPI           _users;
+    private readonly IDiscordRestGuildAPI          _guildApi;
+    private readonly IDiscordRestChannelAPI        _channelApi;
     private readonly ILogger<GuildGreetingService> _logger;
-
-    private readonly IMediator              _mediator;
-    private readonly IShardIdentification   _shard;
-    private readonly IDiscordRestUserAPI    _users;
-    private readonly IDiscordRestGuildAPI   _guildApi;
-    private readonly IDiscordRestChannelAPI _channelApi;
 
     public GuildGreetingService
     (
-       
         IMediator                     mediator,
-        IShardIdentification                   shard,
+        IShardIdentification          shard,
         IDiscordRestUserAPI           users,
         IDiscordRestGuildAPI          guilds,
         IDiscordRestChannelAPI        channels,
-        GuildConfigCacheService       config,
         ILogger<GuildGreetingService> logger  
     )
     {
         _mediator   = mediator;
-        _shard = shard;
+        _shard      = shard;
         _users      = users;
         _guildApi   = guilds;
         _channelApi = channels;
-        _config     = config;
         _logger     = logger;
 
         //It's important to yield to the queue task here because if we get 429'd, 
@@ -99,7 +96,7 @@ public class GuildGreetingService : IHostedService
         if (!memberRes.IsSuccess)
             return Result.FromError(memberRes.Error);
 
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
 
         if (!config.Greetings.Any())
             return Result.FromSuccess();
@@ -164,7 +161,7 @@ public class GuildGreetingService : IHostedService
                 continue;
             }
 
-            var guildConfig = await _config.GetConfigAsync(pending.GuildID);
+            var guildConfig = await _mediator.Send(new GetGuildConfig.Request(pending.GuildID));
 
             if (guildConfig.Greetings.FirstOrDefault(g => g.Id == pending.GreetingID) is not { } greeting)
             {

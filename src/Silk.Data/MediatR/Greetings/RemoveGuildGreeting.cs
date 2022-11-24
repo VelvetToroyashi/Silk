@@ -1,8 +1,9 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -13,17 +14,19 @@ public static class RemoveGuildGreeting
 {
     public record Request(int GreetingId, Snowflake GuildId) : IRequest<Result>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result>
     {
-        private readonly GuildContext _db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public Handler(GuildContext db) => _db = db;
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
 
-        public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
+        public async ValueTask<Result> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            var guildConfig = await _db.GuildConfigs
+            var guildConfig = await db.GuildConfigs
                                       .AsTracking()
                                       .Include(gc => gc.Greetings)
                                       .FirstOrDefaultAsync(gc => gc.GuildID == request.GuildId, cancellationToken);
@@ -35,12 +38,12 @@ public static class RemoveGuildGreeting
             if (greeting is null)
                 return Result.FromError(new NotFoundError("Greeting not found"));
 
-            bool removed = false;
+            bool removed;
 
             try
             {
                 guildConfig.Greetings.Remove(greeting);
-                removed = await _db.SaveChangesAsync(cancellationToken) > 0;
+                removed = await db.SaveChangesAsync(cancellationToken) > 0;
             }
             catch (Exception e)
             {

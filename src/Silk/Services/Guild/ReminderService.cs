@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
@@ -22,6 +22,7 @@ using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
 using Silk.Utilities;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Services.Guild;
 
@@ -80,7 +81,7 @@ public sealed class ReminderService : IHostedService
     /// </summary>
     /// <param name="userID">The ID of the user to search reminders for.</param>
     /// <returns>The specified user's reminders.</returns>
-    public Task<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
+    public ValueTask<IEnumerable<ReminderEntity>> GetUserRemindersAsync(Snowflake userID) 
         => _mediator.Send(new GetRemindersForUser.Request(userID));
 
     /// <summary>

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Silk.Data.DTOs.Guilds;
@@ -23,16 +24,19 @@ public static class UpdateInfraction
         Optional<bool>            Notified        = default
     ) : IRequest<Infraction>;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, Infraction>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public async Task<Infraction> Handle(Request request, CancellationToken cancellationToken)
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
+
+        public async ValueTask<Infraction> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            var infraction = await _db.Infractions
+            var infraction = await db.Infractions
                                      .AsTracking()
                                      .FirstAsync(inf => inf.CaseNumber == request.CaseID && 
                                                         inf.GuildID == request.GuildID, cancellationToken);
@@ -55,7 +59,7 @@ public static class UpdateInfraction
             if (request.Notified.HasValue)
                 infraction.UserNotified = request.Notified.Value;
 
-            await _db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
             return InfractionEntity.ToDTO(infraction);
         }
     }

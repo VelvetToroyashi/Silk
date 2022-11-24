@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -14,19 +15,23 @@ public static class ShedGuilds
 {
     public record Request(int ShardID, int ShardCount, IReadOnlyList<Snowflake> GuildIDs) : IRequest<Result<int>>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result<int>>
     {
-        private readonly GuildContext _db;
-        
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public async Task<Result<int>> Handle(Request request, CancellationToken cancellationToken)
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
+
+        public async ValueTask<Result<int>> Handle(Request request, CancellationToken cancellationToken)
         {
             try
             {
+                await using var db  = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                
                 var ids = request.GuildIDs.Select(id => id.Value).ToArray();
                 
-                var deleted = await _db.Database.ExecuteSqlRawAsync
+                var deleted = await db.Database.ExecuteSqlRawAsync
                 (
                  $"DELETE FROM guilds g WHERE ((g.\"id\"::bigint >> 22) % {request.ShardCount} = {request.ShardID}) AND g.\"id\" NOT IN({string.Join(", ", ids)}) ;",
                  cancellationToken: cancellationToken

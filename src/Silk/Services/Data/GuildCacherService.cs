@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Objects;
@@ -104,12 +104,12 @@ public class GuildCacherService
             var overwrites = channel.PermissionOverwrites.Value;
 
             var permissions = DiscordPermissionSet.ComputePermissions
-                (
+            (
                  currentUser.ID,
                  guild.Roles.Single(r => r.ID == guild.ID),
                  guild.Roles.Where(r => currentMember.Roles.Contains(r.ID)).ToArray(),
                  overwrites
-                );
+            );
 
             if (permissions.HasPermission(_welcomeMessagePermissions))
             {
@@ -138,6 +138,6 @@ public class GuildCacherService
         return Result.FromSuccess();
     }
     
-    public Task CacheGuildAsync(Snowflake guildID) => _mediator.Send(new GetOrCreateGuild.Request(guildID, StringConstants.DefaultCommandPrefix));
+    public Task CacheGuildAsync(Snowflake guildID) => _mediator.Send(new AddGuild.Request(guildID, StringConstants.DefaultCommandPrefix)).AsTask();
 
 }

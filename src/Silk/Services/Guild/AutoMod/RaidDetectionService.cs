@@ -5,10 +5,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Mediator;
 using Microsoft.Extensions.Hosting;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Rest.Core;
 using Remora.Results;
+using Silk.Data.MediatR.Guilds;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
 
@@ -16,9 +18,10 @@ namespace Silk.Services.Guild;
 
 public class RaidDetectionService : BackgroundService
 {
-    private readonly IInfractionService      _infractions;
-    private readonly IDiscordRestUserAPI     _users;
-    private readonly GuildConfigCacheService _config;
+    private readonly IMediator           _mediator;
+    private readonly IInfractionService  _infractions;
+    private readonly IDiscordRestUserAPI _users;
+
     
     private record Raider(Snowflake GuildID, Snowflake RaiderID, string  Reason);
     
@@ -34,11 +37,12 @@ public class RaidDetectionService : BackgroundService
     private readonly ConcurrentDictionary<Snowflake, (DateTimeOffset LastJoin, int Count)> _joins          = new();
 
     
-    public RaidDetectionService(IInfractionService infractions, IDiscordRestUserAPI users, GuildConfigCacheService config)
+    public RaidDetectionService(IMediator mediator, IInfractionService infractions, IDiscordRestUserAPI users)
     {
-        _infractions = infractions;
-        _users       = users;
-        _config      = config;
+        _mediator      = mediator;
+        _infractions  = infractions;
+        _users        = users;
+        
     }
 
     public async Task<Result> HandleMessageAsync(Snowflake guildID, Snowflake channelID, Snowflake messageID, Snowflake authorID, string? content)
@@ -48,7 +52,7 @@ public class RaidDetectionService : BackgroundService
         
         TrimMessageBuckets(); // Tidy up our buckets before we check if the server even has raid detection enabled.
 
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.EnableRaidDetection)
             return Result.FromSuccess();
@@ -88,7 +92,7 @@ public class RaidDetectionService : BackgroundService
     {
         TrimBuckets(guildID);
 
-        var config = await _config.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.EnableRaidDetection)
             return Result.FromSuccess();

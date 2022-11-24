@@ -4,12 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using MediatR.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NodaTime;
@@ -43,10 +40,11 @@ public class Program
 {
     public static async Task Main()
     {
+        
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
                                    .UseConsoleLifetime();
-        
+
         ConfigureApp(hostBuilder);
         ConfigureServices(hostBuilder).AddPlugins();
 
@@ -58,7 +56,7 @@ public class Program
 
         Log.ForContext<Program>().Information("Attempting to migrate core database");
         var coreMigrationResult = await EnsureDatabaseCreatedAndApplyMigrations(host);
-
+        
         if (coreMigrationResult.IsDefined(out var migrationsApplied))
         {
             Log.ForContext<Program>().Information(migrationsApplied > 0 
@@ -186,9 +184,9 @@ public class Program
         {
             using var serviceScope = builtBuilder.Services.CreateScope();
 
-            await using var dbContext = serviceScope
+            await using var dbContext = await serviceScope
                                        .ServiceProvider
-                                       .GetRequiredService<GuildContext>();
+                                       .GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContextAsync();
 
             var pendingMigrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToList();
 
@@ -206,7 +204,7 @@ public class Program
     private static IHostBuilder ConfigureServices(IHostBuilder builder)
     {
         builder.ConfigureServices(se => se.AddRemoraServices());
-        
+
         AddRedisAndAcquireShard(builder, out var shardId);
         
         builder
@@ -217,10 +215,10 @@ public class Program
                 // A little note on Sentry; it's important to initialize logging FIRST
                 // And then sentry, because we set the settings for sentry later. 
                 // If we configure logging after, it'll override the settings with defaults.
-                
-               
+
                 services
-                   .AddSingleton<ScopeWrapper>()
+                   .AddMediator()
+                   //.AddSingleton<ScopeWrapper>()
                    .AddSilkConfigurationOptions(context.Configuration)
                    .AddSilkLogging(context.Configuration, shardId)
                    .AddSilkDatabase(context.Configuration)
@@ -230,18 +228,17 @@ public class Program
                    .AddHostedService(s => s.GetRequiredService<ReminderService>())
                    .AddSingleton<PhishingGatewayService>()
                    .AddHostedService(s => s.GetRequiredService<PhishingGatewayService>())
-                   .AddSingleton<PhishingDetectionService>()
+                   .AddScoped<PhishingDetectionService>()
                    .AddCondition<RequireNSFWCondition>()
                    .AddCondition<RequireTeamOrOwnerCondition>()
                    .AddSingleton<MemberScannerService>()
-                   .AddSingleton<IPrefixCacheService, PrefixCacheService>()
+                   .AddScoped<IPrefixCacheService, PrefixCacheService>()
                    .AddSingleton<IInfractionService, InfractionService>()
                    .AddHostedService(s => (s.GetRequiredService<IInfractionService>() as InfractionService)!)
                    .AddSingleton<InviteDetectionService>()
                    .AddSingleton<ExemptionEvaluationService>()
                    .AddSingleton<IChannelLoggingService, ChannelLoggingService>()
                    .AddSingleton<MemberLoggerService>()
-                   .AddSingleton<GuildConfigCacheService>()
                    .AddScoped<GuildCacherService>()
                    .AddSingleton<IClock>(SystemClock.Instance)
                    .AddSingleton<IDateTimeZoneSource>(TzdbDateTimeZoneSource.Default)
@@ -253,8 +250,6 @@ public class Program
                    .AddSingleton<RaidDetectionService>()
                    .AddHostedService(s => s.GetRequiredService<RaidDetectionService>())
                    .AddSingleton<MessageLoggerService>()
-                   .AddMediatR(c => c.AsTransient().Using<ScopingMediator>(), typeof(Program).Assembly, typeof(GuildContext).Assembly)
-                   .RemoveAll(typeof(RequestExceptionActionProcessorBehavior<,>))
                    .AddSentry<SentryLoggingOptions>()
                    .Configure<SentryLoggingOptions>
                     (

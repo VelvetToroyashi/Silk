@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -19,8 +18,8 @@ using Remora.Rest.Core;
 using Remora.Results;
 using RoleMenuPlugin.Conditions;
 using RoleMenuPlugin.Database;
-using RoleMenuPlugin.Database.MediatR;
 using Silk.Shared;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 // ReSharper disable once ContextualLoggerProblem
 // ReSharper disable RedundantBlankLines
@@ -40,7 +39,7 @@ namespace RoleMenuPlugin;
              "`rolemenu add` - Adds roles to a role menu")]
 public sealed class RoleMenuCommand : CommandGroup
 {
-    private readonly IMediator                _mediator;
+    private readonly RoleMenuRepository       _repo;
     private readonly MessageContext           _context;
     private readonly IDiscordRestUserAPI      _users;
     private readonly IDiscordRestGuildAPI     _guilds;
@@ -49,8 +48,8 @@ public sealed class RoleMenuCommand : CommandGroup
     
     public RoleMenuCommand
     (
-        IMediator                mediator,
         MessageContext           context,
+        RoleMenuRepository       repo,
         IDiscordRestUserAPI      users,
         IDiscordRestGuildAPI     guilds,
         IDiscordRestChannelAPI   channels,
@@ -62,7 +61,7 @@ public sealed class RoleMenuCommand : CommandGroup
         _channels = channels;
         _guilds   = guilds;
         _logger   = logger;
-        _mediator = mediator;
+        _repo = repo;
     }
 
     [Command("create", "c")]
@@ -126,7 +125,7 @@ public sealed class RoleMenuCommand : CommandGroup
            return await DeleteAfter(_context, _channels, "You must provide at least one role!", TimeSpan.FromSeconds(5));
         }
 
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+        var roleMenuResult = await _repo.GetRoleMenuAsync(messageID.Value);;
 
         var roleResult = await GetRolesAsync();
 
@@ -180,7 +179,7 @@ public sealed class RoleMenuCommand : CommandGroup
             RoleName   = r.Name
         }));
         
-        await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenu.Options));
+        await _repo.UpdateRoleMenuAsync(messageID.Value, roleMenu.Options);
 
         var components = new ActionRowComponent(new[] { new ButtonComponent(ButtonComponentStyle.Success, "Get Roles!", CustomID: CustomIDHelpers.CreateButtonID(RoleMenuInteractionCommands.RoleMenuButtonPrefix), IsDisabled: false) });
         
@@ -207,14 +206,14 @@ public sealed class RoleMenuCommand : CommandGroup
     [Description("Edits aspects about a role menu such as max options, or required roles.")]
     public class EditGroup : CommandGroup
     {
-        private readonly IMediator              _mediator;
+        private readonly RoleMenuRepository     _repo;
         private readonly MessageContext         _context;
         private readonly IDiscordRestChannelAPI _channels;
         
-        public EditGroup(IMediator mediator, MessageContext context, IDiscordRestChannelAPI channels)
+        public EditGroup(RoleMenuRepository repo, MessageContext context, IDiscordRestChannelAPI channels)
         {
-            _mediator      = mediator;
-            _context       = context;
+            _repo     = repo;
+            _context  = context;
             _channels = channels;
         }
         
@@ -239,9 +238,9 @@ public sealed class RoleMenuCommand : CommandGroup
             string? description = null
         )
         {
-            var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+            var roleMenuResult = await _repo.GetRoleMenuAsync(messageID.Value);;
             
-            var res = await _mediator.Send(new UpdateRoleMenu.Request(messageID, roleMenuResult.Entity.Options, maxOptions, description));
+            var res = await _repo.UpdateRoleMenuAsync(messageID.Value, roleMenuResult.Entity.Options, maxOptions, description);
 
             if (description is not null)
             {
@@ -293,7 +292,7 @@ public sealed class RoleMenuCommand : CommandGroup
             string? description = null
         )
         {
-            var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageId.Value));
+            var roleMenuResult = await _repo.GetRoleMenuAsync(messageId.Value);;
             
             var roleMenu = roleMenuResult.Entity;
 
@@ -342,7 +341,7 @@ public sealed class RoleMenuCommand : CommandGroup
                 return await DeleteAfter(_context, _channels, "You can't make a role mutually exclusive and inclusive.", TimeSpan.FromSeconds(5));
             }
 
-            await _mediator.Send(new UpdateRoleMenu.Request(messageId, roleMenu.Options));
+            await _repo.UpdateRoleMenuAsync(messageId.Value, roleMenu.Options);
 
             return Result<ReactionResult>.FromSuccess(new("✅"));
         }
@@ -368,7 +367,7 @@ public sealed class RoleMenuCommand : CommandGroup
             return await DeleteAfter(_context, _channels, "You must provide at least one role!", TimeSpan.FromSeconds(5));
         }
         
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+        var roleMenuResult = await _repo.GetRoleMenuAsync(messageID.Value);;
 
         var roleMenu = roleMenuResult.Entity;
 
@@ -384,7 +383,7 @@ public sealed class RoleMenuCommand : CommandGroup
                                                           "\n\nPerhaps you meant to use `rolemenu delete` instead?", TimeSpan.FromSeconds(25));
         }
         
-        await _mediator.Send(new UpdateRoleMenu.Request(messageID, newRoles));
+        await _repo.UpdateRoleMenuAsync(messageID.Value, newRoles);
         
         var roleMenuMessageResult = await _channels.EditMessageAsync
         (
@@ -441,17 +440,16 @@ public sealed class RoleMenuCommand : CommandGroup
         if (!roleMenuMessageResult.IsSuccess)
             return roleMenuMessageResult;
 
-        var roleMenu = await _mediator.Send
-            (
-             new CreateRoleMenu.Request(new()
-             {
-                 ChannelId = channelID.Value,
-                 GuildId = _context.GuildID.Value.Value,
-                 MessageId = roleMenuMessageResult.Entity.ID.Value,
-                 Options = roles.Select(r => new RoleMenuOptionModel {RoleId = r.ID.Value, RoleName = r.Name})
-                                .ToList()
-             })
-            );
+        var menu = new RoleMenuModel()
+        {
+            ChannelId = channelID.Value,
+            GuildId   = _context.GuildID.Value.Value,
+            MessageId = roleMenuMessageResult.Entity.ID.Value,
+            Options = roles.Select(r => new RoleMenuOptionModel { RoleId = r.ID.Value, RoleName = r.Name })
+                           .ToList()
+        };
+        
+        var roleMenu = await _repo.CreateRoleMenuAsync(menu);
 
         if (!roleMenu.IsSuccess)
             return roleMenu;
@@ -478,9 +476,9 @@ public sealed class RoleMenuCommand : CommandGroup
             return await DeleteAfter(_context, _channels, "To ensure rolemenus aren't accidentally deleted, you must confirm this action by adding `--confirm` to the end of your command.", TimeSpan.FromSeconds(10));
         }
 
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(messageID.Value));
+        var roleMenuResult = await _repo.GetRoleMenuAsync(messageID.Value);;
         
-        await _mediator.Send(new DeleteRoleMenu.Request(messageID.Value));
+        await _repo.DeleteRoleMenuAsync(messageID.Value);
         
         if (roleMenuResult.IsSuccess)
             await _channels.DeleteMessageAsync(new(roleMenuResult.Entity.ChannelId), new(roleMenuResult.Entity.MessageId));

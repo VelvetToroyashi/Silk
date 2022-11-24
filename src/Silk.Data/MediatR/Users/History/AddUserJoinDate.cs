@@ -1,7 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -12,18 +13,21 @@ public static class AddUserJoinDate
 {
     public record Request(Snowflake GuildID, Snowflake UserID, DateTimeOffset Date) : IRequest<Result>;
     
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal class Handler : IRequestHandler<Request, Result>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
+
+        public async ValueTask<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            
-            
             try
             {
-                await _db.Histories
+                await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+                
+                await db.Histories
                          .Upsert(new() { UserID = request.UserID, GuildID = request.GuildID, Date = request.Date, IsJoin = true })
                          .NoUpdate()
                          .RunAsync(cancellationToken);

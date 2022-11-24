@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using MediatR;
+using Mediator;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Rest;

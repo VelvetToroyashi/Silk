@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
@@ -12,6 +12,7 @@ using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Data.MediatR.Users;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
@@ -31,14 +32,12 @@ public class MemberLoggerService
     private const int TwoDays              = 2;
     private const int HalfDay              = 12;
     
-    private readonly IMediator               _mediator;
-    private readonly GuildConfigCacheService _configService;
-    private readonly IChannelLoggingService   _channelLogger;
+    private readonly IMediator              _mediator;
+    private readonly IChannelLoggingService _channelLogger;
     
-    public MemberLoggerService(IMediator mediator, GuildConfigCacheService configService, IChannelLoggingService channelLogger)
+    public MemberLoggerService(IMediator mediator, IChannelLoggingService channelLogger)
     {
         _mediator      = mediator;
-        _configService = configService;
         _channelLogger = channelLogger;
     }
 
@@ -47,7 +46,7 @@ public class MemberLoggerService
         if (!member.User.IsDefined(out var user))
             return Result.FromSuccess();
         
-        var config = await _configService.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.Logging.LogMemberJoins)
             return Result.FromSuccess();
@@ -152,7 +151,7 @@ public class MemberLoggerService
     
     public async Task<Result> LogMemberLeaveAsync(Snowflake guildID, IUser user)
     {
-        var config = await _configService.GetConfigAsync(guildID);
+        var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
         
         if (!config.Logging.LogMemberLeaves)
             return Result.FromSuccess();

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 using Silk.Data.Entities;
 
@@ -17,16 +18,19 @@ public static class GetAllReminders
     /// <summary>
     /// The default handler for <see cref="Request" />.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class Handler : IRequestHandler<Request, IEnumerable<ReminderEntity>>
     {
-        private readonly GuildContext _db;
-        public Handler(GuildContext db) => _db = db;
+        private readonly IDbContextFactory<GuildContext> _dbFactory;
 
-        public async Task<IEnumerable<ReminderEntity>> Handle(Request request, CancellationToken cancellationToken)
+        public Handler(IDbContextFactory<GuildContext> dbFactory) 
+            => _dbFactory = dbFactory;
+
+        public async ValueTask<IEnumerable<ReminderEntity>> Handle(Request request, CancellationToken cancellationToken)
         {
+            await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
             
-            
-            return await _db.Reminders
+            return await db.Reminders
                            .FromSqlRaw("SELECT * FROM reminders r WHERE (COALESCE(r.guild_id, 0)::bigint >> 22) % {0} = {1}", request.ShardCount, request.ShardID)
                            .ToListAsync(cancellationToken);
         }

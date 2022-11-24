@@ -1,15 +1,16 @@
-using System;
+/*using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Mediator;
 using MediatR.Wrappers;
 using Microsoft.Extensions.DependencyInjection;
+using ServiceFactory = MediatR.ServiceFactory;
 
 namespace Silk.Utilities;
 
-public class ScopingMediator : IMediator
+public class ScopingMediator //: MediatR.IMediator
 {
     private readonly        ServiceFactory                                 _serviceFactory;
     private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
@@ -59,4 +60,4 @@ public class ScopingMediator : IMediator
     public       IAsyncEnumerable<object?>   CreateStream(object                               request, CancellationToken cancellationToken = new CancellationToken()) => null;
     public async Task Publish(object                       notification, CancellationToken cancellationToken = new CancellationToken())                                     { }
     public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = new CancellationToken()) where TNotification : INotification { }
-}
+}*/

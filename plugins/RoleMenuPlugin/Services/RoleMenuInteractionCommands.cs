@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -13,7 +12,8 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Interactivity;
 using Remora.Rest.Core;
 using Remora.Results;
-using RoleMenuPlugin.Database.MediatR;
+using RoleMenuPlugin.Database;
+using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace RoleMenuPlugin;
 
@@ -23,7 +23,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
     
     public const string RoleMenuDropdownPrefix = "rm-menu-selector";
 
-    private readonly IMediator                            _mediator;
+    private readonly RoleMenuRepository                   _repo;
     private readonly InteractionContext                   _context;
     private readonly IDiscordRestUserAPI                  _users;
     private readonly IDiscordRestGuildAPI                 _guilds;
@@ -32,15 +32,15 @@ public class RoleMenuInteractionCommands : InteractionGroup
     
     public RoleMenuInteractionCommands
     (
-        IMediator mediator,
-        InteractionContext context,
-        IDiscordRestUserAPI users,
-        IDiscordRestGuildAPI guilds,
-        IDiscordRestInteractionAPI interactions,
+        RoleMenuRepository                   repo,
+        InteractionContext                   context,
+        IDiscordRestUserAPI                  users,
+        IDiscordRestGuildAPI                 guilds,
+        IDiscordRestInteractionAPI           interactions,
         ILogger<RoleMenuInteractionCommands> logger
     )
     {
-        _mediator     = mediator;
+        _repo         = repo;
         _context      = context;
         _users        = users;
         _guilds       = guilds;
@@ -52,7 +52,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
     // TODO: [RequiresRoleMenu] ?
     public async Task<IResult> HandleButtonAsync()
     {
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(_context.Message.Value.ID.Value));
+        var roleMenuResult = await _repo.GetRoleMenuAsync(_context.Message.Value.ID.Value);
 
         if (!roleMenuResult.IsDefined(out var rolemenu))
         {
@@ -154,7 +154,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
         )
         .ToArray();
 
-        var roleMenuResult = await _mediator.Send(new GetRoleMenu.Request(_context.Message.Value.MessageReference.Value.MessageID.Value.Value));
+        var roleMenuResult = await _repo.GetRoleMenuAsync(_context.Message.Value.MessageReference.Value.MessageID.Value.Value);
 
         if (!roleMenuResult.IsDefined(out var roleMenu))
         {

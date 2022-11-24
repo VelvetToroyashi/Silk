@@ -2,11 +2,13 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Results;
 using Silk.Data.Entities;
+using Silk.Data.MediatR.Guilds;
 using Silk.Services.Bot;
 using Silk.Services.Data;
 using Silk.Services.Interfaces;
@@ -20,30 +22,30 @@ public class InviteDetectionService
    private static readonly Regex InviteRegex = new(@"discord\.gg\/(?<invite>[a-zA-Z0-9]+)", RegexOptions.Compiled); 
    
    private static readonly Regex AggressiveInviteRegex = new(@"(?:https?\:\/\/)?(www\.)?(((di?sc(?:ord)?\.(gg|io|me|li))|(discord(?:app)?\.com\/invite))\/(?<invite>[A-z0-9-]{2,}))", RegexOptions.Compiled);
-   
-   private readonly IInfractionService               _infractions;
-   private readonly IDiscordRestUserAPI              _users;
-   private readonly IDiscordRestInviteAPI            _invites;
-   private readonly IDiscordRestChannelAPI           _channels;
-   private readonly GuildConfigCacheService          _config;
-   private readonly ExemptionEvaluationService       _exemptions;
+  
+   private readonly IMediator                       _mediator; 
+   private readonly IInfractionService              _infractions;
+   private readonly IDiscordRestUserAPI             _users;
+   private readonly IDiscordRestInviteAPI           _invites;
+   private readonly IDiscordRestChannelAPI          _channels;
+   private readonly ExemptionEvaluationService      _exemptions;
    private readonly ILogger<InviteDetectionService> _logger;
    public InviteDetectionService
    (
-      IInfractionService               infractions,
-      IDiscordRestUserAPI              users,
-      IDiscordRestInviteAPI            invites,
-      IDiscordRestChannelAPI           channels,
-      GuildConfigCacheService          config,
-      ExemptionEvaluationService       exemptions,
+      IMediator                       mediator,
+      IInfractionService              infractions,
+      IDiscordRestUserAPI             users,
+      IDiscordRestInviteAPI           invites,
+      IDiscordRestChannelAPI          channels,
+      ExemptionEvaluationService      exemptions,
       ILogger<InviteDetectionService> logger
    )
    {
+      _mediator    = mediator;
       _infractions = infractions;
       _users       = users;
       _invites     = invites;
       _channels    = channels;
-      _config      = config;
       _exemptions  = exemptions;
       _logger      = logger;
    }
@@ -61,7 +63,7 @@ public class InviteDetectionService
       if (string.IsNullOrEmpty(message.Content))
          return Result.FromSuccess();
       
-      var config = await _config.GetConfigAsync(guildID);
+      var config = await _mediator.Send(new GetGuildConfig.Request(guildID));
       var start  = DateTimeOffset.UtcNow;
       
       var inviteMatch = config.Invites.UseAggressiveRegex 

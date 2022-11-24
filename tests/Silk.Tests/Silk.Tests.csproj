@@ -7,7 +7,6 @@
 
     <ItemGroup>
         <PackageReference Include="AutoFake" Version="0.4.3.9" />
-        <PackageReference Include="MediatR" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="Moq" />
