@@ -41,7 +41,14 @@ public static class AddGuild
             {
                 ID            = request.GuildID,
                 Prefix        = request.Prefix,
-                Configuration = new() { GuildID = request.GuildID },
+                Configuration =
+                {
+                    GuildID = request.GuildID,
+                    Logging =
+                    {
+                        GuildID = request.GuildID
+                    }
+                }
             };
 
             db.Guilds.Add(guild);
