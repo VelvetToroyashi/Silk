@@ -33,7 +33,7 @@
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="JetBrains.Annotations" />
-        <PackageReference Include="MathParser.org-mXparser" Version="5.0.7" />
+        <PackageReference Include="MathParser.org-mXparser" Version="5.1.0" />
         <PackageReference Include="Mediator.Abstractions" Version="2.1.0-preview.2" />
         <PackageReference Include="Mediator.SourceGenerator" Version="2.1.0-preview.2">
           <PrivateAssets>all</PrivateAssets>
