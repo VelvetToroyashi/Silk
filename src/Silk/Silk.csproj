@@ -89,7 +89,7 @@
         <PackageReference Include="Svg.Skia" Version="0.5.18" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="7.0.0" />
-        <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+        <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
         <PackageReference Include="Unidecode.NET" Version="2.1.0" />
         <PackageReference Include="VTP.Remora.Views" Version="1.0.3-alpha" />
     </ItemGroup>
