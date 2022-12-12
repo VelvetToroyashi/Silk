@@ -91,7 +91,7 @@ public class AboutCommand : CommandGroup
         
         var res = await _channelApi.CreateMessageAsync
         (
-         _context.ChannelID,
+         _context.GetChannelID(),
          embeds: new[] { infoEmbed, GetPluginInfoEmbed() },
          components: new IMessageComponent[]
          {

@@ -15,6 +15,7 @@ using Remora.Results;
 using Silk.Commands.Conditions;
 using Silk.Commands.Furry.Types;
 using Silk.Shared.Configuration;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Furry;
@@ -79,7 +80,7 @@ public class e621Command : eBooruBaseCommand
 
         if (!result.IsSuccess)
         {
-            Result<IMessage> errorResult = await _channelApi.CreateMessageAsync(_context.ChannelID, result.Error!.Message);
+            Result<IMessage> errorResult = await _channelApi.CreateMessageAsync(_context.GetChannelID(), result.Error!.Message);
            return (Result)errorResult;
         }
 
@@ -88,7 +89,7 @@ public class e621Command : eBooruBaseCommand
         if (booruPosts is null || booruPosts.Count is 0)
             return Result.FromError(new ArgumentOutOfRangeError("No results found."));
 
-        IReadOnlyList<Post> posts = GetRandomPosts(booruPosts, amount, (int)((_context as MessageContext)?.MessageID.Value ?? 0));
+        IReadOnlyList<Post> posts = GetRandomPosts(booruPosts, amount, (int)_context.GetMessageID().Value / 2);
         List<IEmbed> embeds = posts.Select(post =>
                                                new Embed
                                                {
@@ -106,7 +107,7 @@ public class e621Command : eBooruBaseCommand
                                    .Cast<IEmbed>()
                                    .ToList();
 
-        Result<IMessage> send = await _channelApi.CreateMessageAsync(_context.ChannelID, embeds: embeds);
+        Result<IMessage> send = await _channelApi.CreateMessageAsync(_context.GetChannelID(), embeds: embeds);
 
        return (Result)send;
     }

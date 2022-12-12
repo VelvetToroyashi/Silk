@@ -74,7 +74,7 @@ public class BotStatCommand : CommandGroup
             }
         };
         
-        var res = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        var res = await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         
        return (Result)res;
     }

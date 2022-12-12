@@ -12,6 +12,7 @@ using Silk.Commands.Conditions;
 using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
@@ -45,11 +46,11 @@ public class NoteCommand : CommandGroup
         string note
     )
     {
-        var infractionResult = await _infractions.AddNoteAsync(_context.GuildID.Value, user.ID, _context.User.ID, note);
+        var infractionResult = await _infractions.AddNoteAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), note);
 
         return await _channels.CreateMessageAsync
             (
-             _context.ChannelID,
+             _context.GetChannelID(),
              !infractionResult.IsSuccess
                  ? infractionResult.Error.Message
                  : $"{Emojis.NoteEmoji} Note recorded for **{user.ToDiscordTag()}**!"

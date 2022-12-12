@@ -9,6 +9,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Data.MediatR.Users;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Miscellaneous;
@@ -46,12 +47,12 @@ public class TimezoneCommand : CommandGroup
         var dto = _timezones.GetZoneOrNull(timezoneCode);
 
         if (dto is not { } zone)
-            return await _channels.CreateMessageAsync(_context.ChannelID, "I don't know what timezone that is!");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "I don't know what timezone that is!");
 
         var time = zone.GetUtcOffset(Instant.FromDateTimeOffset(DateTimeOffset.UtcNow));
 
-        await _mediator.Send(new SetUserTimezone.Request(_context.User.ID, timezoneCode, shared));
+        await _mediator.Send(new SetUserTimezone.Request(_context.GetUserID(), timezoneCode, shared));
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, $"Done! The current time should be **{DateTimeOffset.UtcNow + TimeSpan.FromSeconds(time.Seconds)}**.");
+        return await _channels.CreateMessageAsync(_context.GetChannelID(), $"Done! The current time should be **{DateTimeOffset.UtcNow + TimeSpan.FromSeconds(time.Seconds)}**.");
     }
 }

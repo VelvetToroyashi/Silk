@@ -32,7 +32,7 @@ public class AfterSlashHandler : IPostExecutionEvent
          *
          * No idea what this will entail, but it works for now.
          */
-        await _interactions.CreateFollowupMessageAsync(ic.ApplicationID, ic.Token, commandResult.Error!.Message, ct: ct);
+        await _interactions.CreateFollowupMessageAsync(ic.Interaction.ApplicationID, ic.Interaction.Token, commandResult.Error!.Message, ct: ct);
         
         return Result.FromSuccess();
     }

@@ -40,7 +40,12 @@ public class MessageParser : AbstractTypeParser<IMessage>
             }
         }
 
-        channel ??= _context.ChannelID;
+        channel ??= _context switch
+        {
+            MessageContext messageContext => messageContext.Message.ChannelID.IsDefined(out var chn) ? chn : null,
+            InteractionContext interactionContext => interactionContext.Interaction.ChannelID.IsDefined(out var chn) ? chn : null,
+            _ => null
+        };
         
         if (!message.HasValue)
             return Result<IMessage>.FromError(new ArgumentInvalidError(nameof(token), "Could not parse a message ID from the given token."));

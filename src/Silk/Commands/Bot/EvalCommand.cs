@@ -24,6 +24,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Commands.Conditions;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 using CollectionExtensions = Silk.Extensions.CollectionExtensions;
 
@@ -98,7 +99,7 @@ Microsoft.Extensions.Logging
     {
         var cs = Regex.Replace(_context.Message.Content.Value, @"^(?:\S{0,24}?eval ? \n?)((?:(?!\`\`\`)(?<code>[\S\s]+))|(?:(?:\`\`\`cs|csharp\n)(?<code>[\S\s]+)\n?\`\`\`$))", "$1", RegexOptions.Compiled | RegexOptions.ECMAScript | RegexOptions.Multiline);
         
-        var messageResult = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {_evaluatingEmbed});
+        var messageResult = await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] {_evaluatingEmbed});
         
         if (!messageResult.IsDefined(out IMessage? msg))
             return Result.FromError(messageResult.Error!);
@@ -107,10 +108,10 @@ Microsoft.Extensions.Logging
         {
             var globals = new EvalVariables
             {
-                UserID         = _context.User.ID,
+                UserID         = _context.GetUserID(),
                 GuildID        = _context.GuildID.IsDefined(out var guildID) ? guildID : default,
-                ChannelID      = _context.ChannelID,
-                MessageID      = _context.MessageID,
+                ChannelID      = _context.GetChannelID(),
+                MessageID      = _context.GetMessageID(),
                 ReplyMessageID = _context.Message.ReferencedMessage.IsDefined(out var reply) ? reply.ID : default,
                 
                 Services = _services,
@@ -137,17 +138,17 @@ Microsoft.Extensions.Logging
 
             if (string.IsNullOrEmpty(evalResult.ReturnValue?.ToString()))
             {
-                await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "The evaluation returned null or void.", embeds: Array.Empty<IEmbed>());
+                await _channels.EditMessageAsync(_context.GetChannelID(), msg.ID, "The evaluation returned null or void.", embeds: Array.Empty<IEmbed>());
                 return Result.FromSuccess();
             }
             
             if (evalResult.ReturnValue is IEmbed embed)
             {
-                var edit = await _channels.EditMessageAsync(_context.ChannelID, msg.ID, embeds: new[] { embed });
+                var edit = await _channels.EditMessageAsync(_context.GetChannelID(), msg.ID, embeds: new[] { embed });
 
                 if (!edit.IsSuccess)
                 {
-                    await _channels.EditMessageAsync(_context.ChannelID, msg.ID, "Failed to edit message.\n" + edit.Error);
+                    await _channels.EditMessageAsync(_context.GetChannelID(), msg.ID, "Failed to edit message.\n" + edit.Error);
                     return Result.FromError(edit.Error);
                 }
             }
@@ -161,7 +162,7 @@ Microsoft.Extensions.Logging
                 Colour = Color.MidnightBlue
             };
             
-            await _channels.EditMessageAsync(_context.ChannelID, msg.ID, embeds: new[] { returnEmbed });
+            await _channels.EditMessageAsync(_context.GetChannelID(), msg.ID, embeds: new[] { returnEmbed });
         }
         catch (Exception ex)
         {
@@ -172,7 +173,7 @@ Microsoft.Extensions.Logging
                 Colour      = Color.Firebrick
             };
             
-            await _channels.EditMessageAsync(_context.ChannelID, msg.ID, embeds: new[] { exEmbed });
+            await _channels.EditMessageAsync(_context.GetChannelID(), msg.ID, embeds: new[] { exEmbed });
         }
         
         return Result.FromSuccess();

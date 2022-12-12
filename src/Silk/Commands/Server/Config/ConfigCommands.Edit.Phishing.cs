@@ -9,6 +9,7 @@ using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -41,7 +42,7 @@ public partial class ConfigCommands
         )
         {
             if (action is not null and not ("kick" or "ban" or "mute"))
-                return await _channels.CreateMessageAsync(_context.ChannelID, "Invalid action. Valid actions are: kick, ban, and mute.");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "Invalid action. Valid actions are: kick, ban, and mute.");
 
             InfractionType? parsedAction = action switch
             {

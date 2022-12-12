@@ -8,6 +8,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Infrastructure;
 using Silk.Services.Bot.Help;
+using Silk.Utilities;
 
 namespace VTP.Remora.Commands.HelpSystem;
 
@@ -29,6 +30,6 @@ public class HelpCommand : CommandGroup
     [Command("help")]
     [Description("Displays help for a command or group of commands.")]
     public Task<Result> ShowHelpAsync([Greedy] string? command = null)
-        => _commandHelp.ShowHelpAsync(_context.ChannelID, command, _options.Value.TreeName);
+        => _commandHelp.ShowHelpAsync(_context.GetChannelID(), command, _options.Value.TreeName);
 
 }

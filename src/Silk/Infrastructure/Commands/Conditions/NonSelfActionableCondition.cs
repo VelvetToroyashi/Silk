@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Commands.Conditions;
@@ -24,7 +25,14 @@ public class NonSelfActionableCondition :
 
     public async ValueTask<Result> CheckAsync(NonSelfActionableAttribute attribute, IUser user, CancellationToken ct = default)
     {
-        if (user.ID == _context.User.ID)
+        var contextUser = _context switch
+        {
+            IInteractionContext interactionContext => interactionContext.Interaction.User.Value,
+            ITextCommandContext textCommandContext => textCommandContext.Message.Author.Value,
+            _                                      => throw new InvalidOperationException()
+        };
+        
+        if (user.ID == contextUser.ID)
             return Result.FromError(new SelfActionError("Sorry, but I can't let you do this to yourself!"));
 
         var selfResult = await _users.GetCurrentUserAsync(ct);
@@ -32,7 +40,7 @@ public class NonSelfActionableCondition :
         if (!selfResult.IsDefined(out var self))
             return Result.FromError(selfResult.Error!); 
         
-        if (self.ID == _context.User.ID)
+        if (self.ID == contextUser.ID)
             return Result.FromError(new SelfActionError("Sorry, but it's against my programming to do this to myself!"));
         
         return Result.FromSuccess();

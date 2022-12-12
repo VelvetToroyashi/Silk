@@ -11,6 +11,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General.DiceRoll;
@@ -32,15 +33,15 @@ public class DiceRollCommand : CommandGroup
 
     [Command("random")]
     [Description("Generate a random number in a given range; defaults to 100. (Hard limit of ~2.1 billion)")]
-    public Task<Result<IMessage>> Random(Int64 max = 100)
-        => _channels.CreateMessageAsync(_context.ChannelID, $"{_random.NextInt64(max)} is your number!");
+    public Task<Result<IMessage>> Random(long max = 100)
+        => _channels.CreateMessageAsync(_context.GetChannelID(), $"{_random.NextInt64(max)} is your number!");
 
     [Command("roll")]
     [Description("Roll die like it's DnD! Example: 2d4 + 10 + d7")]
     public Task<Result<IMessage>> Roll([Greedy] string roll)
     {
         if (string.IsNullOrEmpty(roll))
-            return _channels.CreateMessageAsync(_context.ChannelID, "You need to specify a roll!");
+            return _channels.CreateMessageAsync(_context.GetChannelID(), "You need to specify a roll!");
         
         var         parser = new DiceParser(roll);
         IList<Step> steps  = parser.Run();
@@ -78,7 +79,7 @@ public class DiceRollCommand : CommandGroup
             Fields = embedFields
         };
         
-        return _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+        return _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] {embed});
     }
     
 }

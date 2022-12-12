@@ -17,6 +17,7 @@ using Remora.Results;
 using Silk.Data.MediatR.Guilds;
 using Silk.Services.Data;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
@@ -132,7 +133,7 @@ public partial class ConfigCommands : CommandGroup
                 Description = contentBuilder.ToString()
             };
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         }
     }
 }

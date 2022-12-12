@@ -10,6 +10,7 @@ using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -53,7 +54,7 @@ public partial class ConfigCommands
             else
             {
                 if (config.Greetings.FirstOrDefault(g => g.Id == id) is not { } greeting)
-                    return await _channels.CreateMessageAsync(_context.ChannelID, "I don't see a greeting with that ID!");
+                    return await _channels.CreateMessageAsync(_context.GetChannelID(), "I don't see a greeting with that ID!");
 
                 embed = new()
                 {
@@ -63,7 +64,7 @@ public partial class ConfigCommands
                 };
             }
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         }
     }
 }

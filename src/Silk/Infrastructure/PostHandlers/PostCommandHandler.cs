@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -35,11 +36,11 @@ public class PostCommandHandler : IPostExecutionEvent
         IDiscordRestInteractionAPI interactions
     )
     {
-        _hub      = hub;
-        _help     = help;
-        _prefix   = prefix;
-        _channels = channels;
-        _interactions      = interactions;
+        _hub          = hub;
+        _help         = help;
+        _prefix       = prefix;
+        _channels     = channels;
+        _interactions = interactions;
     }
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct = default)
@@ -49,13 +50,34 @@ public class PostCommandHandler : IPostExecutionEvent
         
         var error = commandResult.GetDeepestError();
         
-        _hub.ConfigureScope(s => s.Contexts[context.User.ID.ToString()] = new Dictionary<string, object>
+        var user = context switch 
+        {
+            ITextCommandContext c => c.Message.Author.Value,
+            IInteractionContext c => c.Interaction.User.Value,
+            _ => throw new InvalidOperationException()
+        };
+        
+        var guildID = context switch 
+        {
+            ITextCommandContext c => c.GuildID,
+            IInteractionContext c => c.Interaction.GuildID,
+            _ => throw new InvalidOperationException()
+        };
+        
+        var channelID = context switch 
+        {
+            ITextCommandContext c => c.Message.ChannelID,
+            IInteractionContext c => c.Interaction.ChannelID,
+            _ => throw new InvalidOperationException()
+        };
+        
+        _hub.ConfigureScope(s => s.Contexts[user.ID.ToString()] = new Dictionary<string, object>
         { 
-            ["id"]       = context.User.ID.ToString(),
-            ["guild_id"] = context.GuildID.IsDefined(out var gid) ? gid.ToString() : "DM",
+            ["id"]       = user.ID.ToString(),
+            ["guild_id"] = guildID.IsDefined(out var gid) ? gid.ToString() : "DM",
         });
 
-        if (context is MessageContext mc)
+        if (context is TextCommandContext mc)
         {
             var prefixResult = await _prefix.MatchesPrefixAsync(mc.Message.Content.Value, ct);
         
@@ -63,7 +85,7 @@ public class PostCommandHandler : IPostExecutionEvent
                 return Result.FromSuccess();
             
             if (error is CommandNotFoundError)
-                await _help.ShowHelpAsync(mc.ChannelID, mc.Message.Content.Value[prefix.ContentStartIndex..]);
+                await _help.ShowHelpAsync(mc.Message.ChannelID.Value, mc.Message.Content.Value[prefix.ContentStartIndex..]);
         }
         
         if (error is ExceptionError er)
@@ -81,9 +103,9 @@ public class PostCommandHandler : IPostExecutionEvent
             };
 
             if (context is not InteractionContext ic)
-                await _channels.CreateMessageAsync(context.ChannelID, responseMessage, ct: ct);
+                await _channels.CreateMessageAsync(channelID.Value, responseMessage, ct: ct);
             else
-                await _interactions.CreateFollowupMessageAsync(ic.ApplicationID, ic.Token, responseMessage, flags: MessageFlags.Ephemeral, ct: ct);
+                await _interactions.CreateFollowupMessageAsync(ic.Interaction.ApplicationID, ic.Interaction.Token, responseMessage, flags: MessageFlags.Ephemeral, ct: ct);
         }
         return Result.FromSuccess();
     }

@@ -20,6 +20,7 @@ using Remora.Results;
 using Silk.Commands.Conditions;
 using Silk.Extensions;
 using Silk.Shared.Configuration;
+using Silk.Utilities;
 
 namespace Silk.Commands.Bot;
 
@@ -93,11 +94,11 @@ public class RestRequestCommand : CommandGroup
                 Description = "```json\n" + jsn + "\n```"
             };
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] {embed});
         }
         else
         {
-            return await _channels.CreateMessageAsync(_context.ChannelID,
+            return await _channels.CreateMessageAsync(_context.GetChannelID(),
                                                       $"{(int)res.StatusCode} - {res.StatusCode.Humanize(LetterCasing.AllCaps)}\n" +
                                                       " The response is too long to Display, so I've sent it as a file~!",
                                                       attachments: new OneOf<FileData, IPartialAttachment>[]

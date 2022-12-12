@@ -8,6 +8,7 @@ using Remora.Results;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -47,13 +48,13 @@ public partial class ConfigCommands
         {
             if (threshold is < 3)
             {
-                await _channels.CreateMessageAsync(_context.ChannelID, "A raid threshold of less than three is not recommended.");
+                await _channels.CreateMessageAsync(_context.GetChannelID(), "A raid threshold of less than three is not recommended.");
                 return Result<ReactionResult>.FromSuccess(new(Emojis.WarningId));
             }
             
             if (decay is < 10)
             {
-                await _channels.CreateMessageAsync(_context.ChannelID, "A raid decay of less than ten seconds is not recommended.");
+                await _channels.CreateMessageAsync(_context.GetChannelID(), "A raid decay of less than ten seconds is not recommended.");
                 return Result<ReactionResult>.FromSuccess(new(Emojis.WarningId));
             }
 

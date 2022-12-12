@@ -18,6 +18,7 @@ using Silk.Data.DTOs.Guilds;
 using Silk.Data.MediatR.Infractions;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
@@ -47,10 +48,10 @@ public class CasesCommand : CommandGroup
     [RequireDiscordPermission(DiscordPermission.ManageMessages)]
     public async Task<Result<IMessage>> ViewCaseAsync(int caseID)
     {
-        var infCase = await _mediator.Send(new GetUserInfractionForGuild.Request(default, _context.GuildID.Value, default, caseID));
+        var infCase = await _mediator.Send(new GetUserInfractionForGuild.Request(default, _context.GetGuildID(), default, caseID));
         
         if (infCase is null)
-            return await _channels.CreateMessageAsync(_context.ChannelID, "Case not found.");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "Case not found.");
 
         var embed = new Embed
         {
@@ -68,7 +69,7 @@ public class CasesCommand : CommandGroup
             }
         };
 
-        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
     }
     
     [Command("cases")]
@@ -77,10 +78,10 @@ public class CasesCommand : CommandGroup
     [Description("Fetch all infractions for a user including kicks, mutes, and more.")]
     public async Task<Result<IMessage>> Cases(IUser user)
     {
-        var cases = await _mediator.Send(new GetUserInfractionsForGuild.Request(_context.GuildID.Value, user.ID));
+        var cases = await _mediator.Send(new GetUserInfractionsForGuild.Request(_context.GetGuildID(), user.ID));
         
         if (!cases.Any())
-            return await _channels.CreateMessageAsync(_context.ChannelID, "It appears this user is clean. They should keep it up!");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "It appears this user is clean. They should keep it up!");
 
         if (cases.Count() > 5)
         {
@@ -94,7 +95,7 @@ public class CasesCommand : CommandGroup
                                                         }
                                              );
 
-            return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, paginatedInfractions.ToList());
+            return await _interactivity.SendPaginatedMessageAsync(_context.GetChannelID(), _context.GetUserID(), paginatedInfractions.ToList());
         }
         
         var embed = new Embed
@@ -104,7 +105,7 @@ public class CasesCommand : CommandGroup
             Description = cases.Select(GetCaseDescription).Join("\n")
         };
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+        return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] {embed});
     }
 
     private string GetCaseDescription(Infraction infraction) =>

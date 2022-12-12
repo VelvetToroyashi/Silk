@@ -14,6 +14,7 @@ using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Rest.Core;
 using RemoraViewsPOC.Extensions;
+using Silk.Utilities;
 using Silk.Views;
 
 namespace Silk.Commands.Interactivity;
@@ -50,13 +51,13 @@ public class MemberScanButtonHandler : InteractionGroup
     [Button("member-check::dump")]
     public async Task<Result> DumpAsync()
     {
-        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.GuildID.Value}:Members", CancellationToken);
+        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members", CancellationToken);
         
         if (!idCheck.IsDefined(out var IDs))
             return (Result)await _interactions.CreateFollowupMessageAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "It seems the IDs have gone missing! This is likely due to a service restart.",
              flags: MessageFlags.Ephemeral,
              ct: CancellationToken
@@ -66,8 +67,8 @@ public class MemberScanButtonHandler : InteractionGroup
             
         return (Result)await _interactions.CreateFollowupMessageAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          "Here you go!",
          flags: MessageFlags.Ephemeral,
          attachments: new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("IDs.txt", file)) },
@@ -78,15 +79,15 @@ public class MemberScanButtonHandler : InteractionGroup
     [Button("member-check::kick")]
     public async Task<Result> KickAsync()
     {
-        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.GuildID.Value}:Members", CancellationToken);
+        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members", CancellationToken);
         
-        var components = ((IPartialActionRowComponent)_context.Message.Value.Components.Value[0]).Components.Value;
+        var components = ((IPartialActionRowComponent)_context.Interaction.Message.Value.Components.Value[0]).Components.Value;
         
         if (!idCheck.IsDefined(out var IDs))
             return (Result)await _interactions.CreateFollowupMessageAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "It seems the IDs have gone missing! This is likely due to a service restart.",
              flags: MessageFlags.Ephemeral,
              ct: CancellationToken
@@ -94,16 +95,16 @@ public class MemberScanButtonHandler : InteractionGroup
         
         await _interactions.EditOriginalInteractionResponseAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          new MemberScanView(true),
          CancellationToken
         );
 
         var followupResult = await _interactions.CreateFollowupMessageAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          "Alright! This could take a while.",
          flags: MessageFlags.Ephemeral,
          ct: CancellationToken
@@ -112,14 +113,14 @@ public class MemberScanButtonHandler : InteractionGroup
         if (!followupResult.IsDefined(out var followup))
             return (Result)followupResult;
             
-        var kicked = await Task.WhenAll(IDs.Select(id => _infractions.KickAsync(_context.GuildID.Value, id, _context.User.ID, "Phishing detected: Moderater initiated manual mass-kick.", false)));
+        var kicked = await Task.WhenAll(IDs.Select(id => _infractions.KickAsync(_context.Interaction.GuildID.Value, id, _context.GetUserID(), "Phishing detected: Moderater initiated manual mass-kick.", false)));
             
         var failed = kicked.Count(r => !r.IsSuccess);
             
         return (Result)await _interactions.EditFollowupMessageAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          followup.ID,
          $"Done! Kicked {IDs.Count - failed}/{IDs.Count} users.",
          ct: CancellationToken
@@ -129,15 +130,15 @@ public class MemberScanButtonHandler : InteractionGroup
     [Button("member-check::ban")]
     public async Task<Result> BanAsync()
     {
-        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.GuildID.Value}:Members", CancellationToken);
+        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members", CancellationToken);
         
-        var components = ((IPartialActionRowComponent)_context.Message.Value.Components.Value[0]).Components.Value;
+        var components = ((IPartialActionRowComponent)_context.Interaction.Message.Value.Components.Value[0]).Components.Value;
         
         if (!idCheck.IsDefined(out var IDs))
             return (Result)await _interactions.CreateFollowupMessageAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "It seems the IDs have gone missing! This is likely due to a service restart.",
              flags: MessageFlags.Ephemeral,
              ct: CancellationToken
@@ -145,16 +146,16 @@ public class MemberScanButtonHandler : InteractionGroup
         
         await _interactions.EditOriginalInteractionResponseAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          new MemberScanView(true),
          ct: CancellationToken
         );
             
         var followupResult = await _interactions.CreateFollowupMessageAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          "Alright! This could take a while.",
          flags: MessageFlags.Ephemeral,
          ct: CancellationToken
@@ -163,14 +164,14 @@ public class MemberScanButtonHandler : InteractionGroup
         if (!followupResult.IsDefined(out var followup))
             return (Result)followupResult;
 
-        var kicked = await Task.WhenAll(IDs.Select(id => _infractions.BanAsync(_context.GuildID.Value, id, _context.User.ID, 0, "Phishing detected: Moderater initiated manual mass-kick.", notify: false)));
+        var kicked = await Task.WhenAll(IDs.Select(id => _infractions.BanAsync(_context.Interaction.GuildID.Value, id, _context.GetUserID(), 0, "Phishing detected: Moderater initiated manual mass-kick.", notify: false)));
             
         var failed = kicked.Count(r => !r.IsSuccess);
             
         return (Result)await _interactions.EditFollowupMessageAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          followup!.ID,
          $"Done! Banned {IDs.Count - failed}/{IDs.Count} users.",
          ct: CancellationToken

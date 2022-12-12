@@ -10,6 +10,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
@@ -17,13 +18,13 @@ namespace Silk.Commands.General;
 [Category(Categories.General)]
 public class AvatarCommand : CommandGroup
 {
-    private readonly ICommandContext        _context;
+    private readonly ITextCommandContext        _context;
     private readonly IDiscordRestGuildAPI   _guilds;
     private readonly IDiscordRestChannelAPI _channels;
     
     public AvatarCommand
     (
-        ICommandContext        context,
+    ITextCommandContext        context,
         IDiscordRestGuildAPI   guilds,
         IDiscordRestChannelAPI channels
     )
@@ -42,7 +43,7 @@ public class AvatarCommand : CommandGroup
         [Description("Get the guild avatar instead of the global avatar.")]
         bool guild = false)
     {
-        user ??= _context.User;
+        user ??= _context.GetUser();
         
         if (!guild)
         {
@@ -54,32 +55,32 @@ public class AvatarCommand : CommandGroup
             if (!avatarURL.IsSuccess)
                 return Result<IMessage>.FromError(avatarURL.Error);
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: GetEmbeds(user, avatarURL.Entity, user.ID == _context.User.ID, guild));
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: GetEmbeds(user, avatarURL.Entity, user.ID == _context.GetUserID(), guild));
         }
         else
         {
             if (!_context.GuildID.IsDefined(out var guildID))
             {
-                var returnResult = await _channels.CreateMessageAsync(_context.ChannelID, "You must be in a server to get someone's guild avatar!");
+                var returnResult = await _channels.CreateMessageAsync(_context.GetChannelID(), "You must be in a server to get someone's guild avatar!");
                 return returnResult;
             }
 
             var memberResult = await _guilds.GetGuildMemberAsync(guildID, user.ID);
             
             if (!memberResult.IsSuccess)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "I couldn't find that user in this server!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "I couldn't find that user in this server!");
             
             var member = memberResult.Entity;
 
             if (!member.Avatar.IsDefined())
-                return await _channels.CreateMessageAsync(_context.ChannelID, "That user doesn't have a guild avatar!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "That user doesn't have a guild avatar!");
             
             var avatarURL = CDN.GetGuildMemberAvatarUrl(guildID, member, imageSize: 4096);
             
             if (!avatarURL.IsSuccess)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "Something went wrong while getting that user's guild avatar!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "Something went wrong while getting that user's guild avatar!");
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: GetEmbeds(user, avatarURL.Entity, user is null, guild));
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: GetEmbeds(user, avatarURL.Entity, user is null, guild));
         }
     }
     

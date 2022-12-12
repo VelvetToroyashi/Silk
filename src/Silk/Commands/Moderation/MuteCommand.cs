@@ -13,6 +13,7 @@ using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Moderation;
 
@@ -46,12 +47,12 @@ public class MuteCommand : CommandGroup
         string reason = "Not Given."
     )
     {
-        var infractionResult = await _infractions.MuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason, duration);
+        var infractionResult = await _infractions.MuteAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), reason, duration);
         var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return (Result)await _channels.CreateMessageAsync
         (
-         _context.ChannelID,
+         _context.GetChannelID(),
          !infractionResult.IsSuccess
              ? infractionResult.Error!.Message
              : $"{Emojis.MuteEmoji} Successfully muted {user.ToDiscordTag()}! {notified}"

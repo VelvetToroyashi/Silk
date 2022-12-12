@@ -11,6 +11,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 using SkiaSharp;
 using Svg.Skia;
@@ -56,12 +57,13 @@ public class EnlargeCommand : CommandGroup
             var emojiName = regexedEmojiURL.Groups["EMOJI"].Value + '.' + regexedEmojiURL.Groups["EXT"].Value;
             
             return await _channels.CreateMessageAsync
-                (
-                 _context.ChannelID,
+            (
+                 _context.GetChannelID(),
                  attachments: new OneOf<FileData, IPartialAttachment>[]
                  {
                      new FileData(emojiName, await _http.GetStreamAsync(emojiURI), null!)
-                 });
+                 }
+            );
         }
         else // Unicode emote.1
         {
@@ -70,7 +72,7 @@ public class EnlargeCommand : CommandGroup
             
             return await _channels.CreateMessageAsync
                 (
-                 _context.ChannelID,
+                 _context.GetChannelID(),
                  attachments: new OneOf<FileData, IPartialAttachment>[]
                  {
                      new FileData(name + ".png", await RenderEmojiAsync(name), null!)

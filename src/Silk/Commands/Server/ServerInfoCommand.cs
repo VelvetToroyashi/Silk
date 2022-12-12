@@ -17,6 +17,7 @@ using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Data.MediatR.Users;
 using Silk.Extensions;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
@@ -45,7 +46,7 @@ public class ServerInfoCommand : CommandGroup
     [Description("Get info about the current Guild")]
     public async Task<IResult> ServerInfo()
     {
-        var guildResult = await _guilds.GetGuildAsync(_context.GuildID.Value, true);
+        var guildResult = await _guilds.GetGuildAsync(_context.GetGuildID(), true);
 
         if (!guildResult.IsDefined(out var guild))
             return guildResult;
@@ -63,7 +64,7 @@ public class ServerInfoCommand : CommandGroup
 
         fields.Add(new EmbedField("Members:" , memberInformation, true));
 
-        var channelsResult = await _guilds.GetGuildChannelsAsync(_context.GuildID.Value); 
+        var channelsResult = await _guilds.GetGuildChannelsAsync(_context.GetGuildID()); 
         
         if (!channelsResult.IsDefined(out var channels))
         {
@@ -96,7 +97,7 @@ public class ServerInfoCommand : CommandGroup
 
         fields.Add(new EmbedField("Server Owner:", $"<@{guild.OwnerID}>", true));
         
-        var recent = await _mediator.Send(new GetMostRecentUser.Request(_context.GuildID.Value));
+        var recent = await _mediator.Send(new GetMostRecentUser.Request(_context.GetGuildID()));
         
         fields.Add(new EmbedField("Most Recent Member:", $"<@{recent?.ID}>", true));
         
@@ -115,7 +116,7 @@ public class ServerInfoCommand : CommandGroup
             Image     = guildBanner is null ? default(Optional<IEmbedImage>) : new EmbedImage(guildBanner.ToString()),
         };
         
-        var res = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        var res = await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
 
         return res;
     }

@@ -21,6 +21,7 @@ using Silk.Utilities.HelpFormatter;
 using Silk.Extensions;
 using Silk.Services.Bot;
 using Silk.Services.Guild;
+using Silk.Utilities;
 using CommandGroup = Remora.Commands.Groups.CommandGroup;
 
 namespace Silk.Commands.General;
@@ -130,17 +131,17 @@ public class ReminderCommands : CommandGroup
             string reminder
         )
         {
-            var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+            var offset     = await _timeHelper.GetOffsetForUserAsync(_context.GetUserID());
             var timeResult = _timeHelper.ExtractTime(reminder, offset, out reminder);
 
             if (!timeResult.IsDefined(out var time))
-                return await _channels.CreateMessageAsync(_context.ChannelID, timeResult.Error!.Message);
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), timeResult.Error!.Message);
 
             if (time <= TimeSpan.Zero)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You can't set a reminder in the past!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "You can't set a reminder in the past!");
             
             if (time < _minimumReminderTime)
-                return await _channels.CreateMessageAsync(_context.ChannelID, $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!");
 
             Snowflake? guildID = _context.GuildID.HasValue ? _context.GuildID.Value : null;
 
@@ -151,9 +152,9 @@ public class ReminderCommands : CommandGroup
             await _reminders.CreateReminderAsync
             (
              reminderTime,
-             _context.User.ID,
-             _context.ChannelID,
-             _context.MessageID,
+             _context.GetUserID(),
+             _context.GetChannelID(),
+             _context.GetMessageID(),
              guildID,
              reminder,
              reply?.Content,
@@ -161,17 +162,17 @@ public class ReminderCommands : CommandGroup
              reply?.Author.ID
             );
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, $"I'll remind you {reminderTime.ToTimestamp()}!");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), $"I'll remind you {reminderTime.ToTimestamp()}!");
         }
         
         [Command("list")]
         [Description("Lists all of your reminders.")]
         public async Task<IResult> ListAsync()
         {
-            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).OrderBy(r => r.ExpiresAt);
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.GetUserID())).OrderBy(r => r.ExpiresAt);
 
             if (!reminders.Any())
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any reminders!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "You don't have any reminders!");
 
             if (reminders.Count() > 5)
             {
@@ -196,7 +197,7 @@ public class ReminderCommands : CommandGroup
                    })
                   .ToArray();
 
-                return await _interactivity.SendPaginatedMessageAsync(_context.ChannelID, _context.User.ID, chunkedReminders);
+                return await _interactivity.SendPaginatedMessageAsync(_context.GetChannelID(), _context.GetUserID(), chunkedReminders);
             }
             else
             {
@@ -220,7 +221,7 @@ public class ReminderCommands : CommandGroup
                     Description = formattedReminders.Join("\n\n"),
                 };
                 
-                return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new [] {embed});
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new [] {embed});
             }
         }
 
@@ -232,15 +233,15 @@ public class ReminderCommands : CommandGroup
             int reminderID
         )
         {
-            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).ToArray();
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.GetUserID())).ToArray();
 
             if (!reminders.Any())
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any active reminders!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "You don't have any active reminders!");
 
             var reminder = reminders.FirstOrDefault(r => r.Id == reminderID);
 
             if (reminder is null)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have a reminder by that ID!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "You don't have a reminder by that ID!");
 
             var sb = new StringBuilder();
 
@@ -266,17 +267,17 @@ public class ReminderCommands : CommandGroup
 
             var embed = new Embed { Colour = Color.DodgerBlue, Description = sb.ToString() };
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         }
 
         [Command("cancel")]
         [Description("Cancels a reminder.")]
         public async Task<IResult> CancelAsync([Description("The ID(s) of the reminder you wish to cancel.")] int[] reminderIDs)
         {
-            var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).Select(r => r.Id).ToArray();
+            var reminders = (await _reminders.GetUserRemindersAsync(_context.GetUserID())).Select(r => r.Id).ToArray();
 
             if (!reminders.Any())
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You don't have any active reminders!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "You don't have any active reminders!");
 
             var sb = new StringBuilder();
 
@@ -292,7 +293,7 @@ public class ReminderCommands : CommandGroup
                 await _reminders.RemoveReminderAsync(reminder);
             }
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, sb.ToString());
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), sb.ToString());
         }
     }
 }

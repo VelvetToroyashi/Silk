@@ -10,6 +10,7 @@ using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Services.Interfaces;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
@@ -52,11 +53,11 @@ public class MassBanCommand : CommandGroup
 
         days = Math.Min((byte)7, days);
         
-        var result = await Task.WhenAll(users.Select((u, i) => _infractions.BanAsync(_context.GuildID.Value, u.ID, _context.User.ID, days, reason, notify: i < 15)));
+        var result = await Task.WhenAll(users.Select((u, i) => _infractions.BanAsync(_context.GetGuildID(), u.ID, _context.GetUserID(), days, reason, notify: i < 15)));
 
         var failed = result.Count(r => !r.IsSuccess);
 
-        await _channels.CreateMessageAsync(_context.ChannelID, $"Banned {users.Length - failed} user(s) {(failed > 0 ? $"(Failed to ban {failed} users)" : null)}");
+        await _channels.CreateMessageAsync(_context.GetChannelID(), $"Banned {users.Length - failed} user(s) {(failed > 0 ? $"(Failed to ban {failed} users)" : null)}");
         
         return Result.FromSuccess();
     }

@@ -6,6 +6,7 @@ using Remora.Discord.API.Objects;
 using Remora.Results;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -39,7 +40,7 @@ public partial class ConfigCommands
                               $"**Warn On Invite:** {action}"
             };
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         }
     }
 }

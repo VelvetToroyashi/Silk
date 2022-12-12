@@ -12,6 +12,7 @@ using Remora.Results;
 using Silk.Data.Entities;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -40,11 +41,11 @@ public partial class ConfigCommands
 
             if (!config.Exemptions.Any())
                 return await _channels.CreateMessageAsync
-                    (
-                     _context.ChannelID,
+                (
+                     _context.GetChannelID(),
                      $"{Emojis.WarningEmoji} You don't appear to have any configured exemptions! " +
                      "See `help config edit exemptions` to learn how to add them!"
-                    );
+                );
 
             var sb = new StringBuilder();
 
@@ -70,7 +71,7 @@ public partial class ConfigCommands
                 Description = sb.ToString()
             };
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         }
     }
 }

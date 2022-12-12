@@ -22,6 +22,7 @@ using Remora.Results;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -63,7 +64,7 @@ public class InfoCommands : CommandGroup
     {
         if (memberOrUser is null && _context.GuildID.IsDefined(out var guild))
         {
-            var memberResult = await _guilds.GetGuildMemberAsync(guild, _context.User.ID);
+            var memberResult = await _guilds.GetGuildMemberAsync(guild, _context.GetUserID());
             
             if (memberResult.IsSuccess)
                 memberOrUser = OneOf<IGuildMember, IUser>.FromT0(memberResult.Entity);
@@ -124,7 +125,7 @@ public class InfoCommands : CommandGroup
 
         var res = await _channels.CreateMessageAsync
         (
-         _context.ChannelID,
+         _context.GetChannelID(),
          embeds: new[] {embed},
          attachments: bannerUrl.IsSuccess || bannerImage is null
              ? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
@@ -136,7 +137,7 @@ public class InfoCommands : CommandGroup
 
     public async Task<IResult> GetUserInfoAsync(IUser? user = null)
     {
-        user ??= _context.User;
+        user ??= _context.GetUser();
         
         await UncacheUserAsync(user.ID);
         
@@ -173,13 +174,13 @@ public class InfoCommands : CommandGroup
         };
         
         var res = await _channels.CreateMessageAsync
-            (
-             _context.ChannelID,
+        (
+             _context.GetChannelID(),
              embeds: new[] {embed},
              attachments: bannerUrl.IsSuccess || bannerImage is null
                  ? default(Optional<IReadOnlyList<OneOf<FileData, IPartialAttachment>>>)
                  : new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("banner.png", bannerImage!)) }
-            );
+        );
 
         return res;
     }
@@ -236,7 +237,7 @@ public class InfoCommands : CommandGroup
         
         var res = await _channels.CreateMessageAsync
         (
-         _context.ChannelID,
+         _context.GetChannelID(),
          embeds: new[] {embed},
          attachments: new[] { OneOf<FileData, IPartialAttachment>.FromT0(new("swatch.png", swatchImage)) }
         );
@@ -250,7 +251,7 @@ public class InfoCommands : CommandGroup
     public async Task<IResult> GetEmojiInfoAsync(IPartialEmoji emoji)
     {
         if (!emoji.ID.IsDefined(out var emojiID))
-            return await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.WarningEmoji}  This appears to be a unicode emoji. I can't tell you anything about it!");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), $"{Emojis.WarningEmoji}  This appears to be a unicode emoji. I can't tell you anything about it!");
         
         var emojiResult = await _emojis.ListGuildEmojisAsync(_context.GuildID.Value);
         
@@ -261,7 +262,7 @@ public class InfoCommands : CommandGroup
         
         Embed embed;
 
-        var emojiUrl = CDN.GetEmojiUrl((guildEmoji?.ID ?? emojiID.Value), imageSize: 256);
+        var emojiUrl = CDN.GetEmojiUrl(guildEmoji?.ID ?? emojiID.Value, imageSize: 256);
 
         if (!emojiUrl.IsDefined(out var url))
             return emojiUrl;
@@ -302,7 +303,7 @@ public class InfoCommands : CommandGroup
             };
         }
 
-        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] {embed});
+        return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] {embed});
     }
     
     private async Task<Result<string>> GetRoleHierarchyStringAsync(IRole role)

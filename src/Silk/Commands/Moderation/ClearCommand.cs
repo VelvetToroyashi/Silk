@@ -14,6 +14,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Rest.Core;
 using Remora.Results;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
@@ -67,12 +68,12 @@ public class ClearCommand : CommandGroup
     )
     {
         if (skip is not null && message is not null)
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You can only specify --skip **or** --around.");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "You can only specify --skip **or** --around.");
         
         if (message?.ID.Timestamp.AddDays(14) < DateTimeOffset.UtcNow)
-            return await _channels.CreateMessageAsync(_context.ChannelID, "You can specify messages up to two weeks old.");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "You can specify messages up to two weeks old.");
         
-        var messageResult = await GetMessagesAsync(_context.ChannelID, message?.ID ?? default(Optional<Snowflake>), messageCount + (skip + 1 ?? 1)); 
+        var messageResult = await GetMessagesAsync(_context.GetChannelID(), message?.ID ?? default(Optional<Snowflake>), messageCount + (skip + 1 ?? 1)); 
             
         if (!messageResult.IsSuccess)
             return Result<IMessage>.FromError(messageResult.Error);
@@ -97,19 +98,19 @@ public class ClearCommand : CommandGroup
         
         messages = messages.Take(messageCount);
         
-        var messageDeleteResult = await _channels.BulkDeleteMessagesAsync(_context.ChannelID, messages.Select(x => x.ID).ToArray());
+        var messageDeleteResult = await _channels.BulkDeleteMessagesAsync(_context.GetChannelID(), messages.Select(x => x.ID).ToArray());
         
         if (!messageDeleteResult.IsSuccess)
             return Result<IMessage>.FromError(messageDeleteResult.Error);
 
         var deleted = Math.Min(messageCount, messages.Count());
         
-        var returnResult = await _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.DeleteEmoji} Deleted {deleted} message{(deleted == 1 ? "" : "s")}.");
+        var returnResult = await _channels.CreateMessageAsync(_context.GetChannelID(), $"{Emojis.DeleteEmoji} Deleted {deleted} message{(deleted == 1 ? "" : "s")}.");
         
         await Task.Delay(6000);
 
-        await _channels.DeleteMessageAsync(_context.ChannelID, (_context as MessageContext)!.MessageID);
-        await _channels.DeleteMessageAsync(_context.ChannelID, returnResult.Entity.ID);
+        await _channels.DeleteMessageAsync(_context.GetChannelID(), _context.GetMessageID());
+        await _channels.DeleteMessageAsync(_context.GetChannelID(), returnResult.Entity.ID);
 
         return returnResult;
     }

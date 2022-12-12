@@ -20,14 +20,20 @@ public class RequireTeamOrOwnerCondition : ICondition<RequireTeamOrOwnerAttribut
     
     public RequireTeamOrOwnerCondition(ICommandContext context, IDiscordRestOAuth2API oauth2)
     {
-        _context     = context;
-        _oauth2 = oauth2;
+        _context = context;
+        _oauth2  = oauth2;
     }
     
     /// <inheritdoc />
     public async ValueTask<Result> CheckAsync(RequireTeamOrOwnerAttribute attribute, CancellationToken ct = default)
     {
         var appResult = await _oauth2.GetCurrentBotApplicationInformationAsync(ct);
+
+        var user = _context switch
+        {
+            IInteractionContext interaction => interaction.Interaction.User.Value,
+            ITextCommandContext command     => command.Message.Author.Value,
+        };
         
         if (!appResult.IsSuccess)
             return Result.FromError(appResult.Error);
@@ -35,11 +41,11 @@ public class RequireTeamOrOwnerCondition : ICondition<RequireTeamOrOwnerAttribut
         var app = appResult.Entity;
 
         if (app.Team is null)
-            return (app.Owner?.ID.IsDefined(out var ID) ?? false) && ID == _context.User.ID
+            return (app.Owner?.ID.IsDefined(out var ID) ?? false) && ID == user.ID
                 ? Result.FromSuccess()
                 : Result.FromError(new PermissionError("You are not an owner of the application."));
         
-        return app.Team.Members.Any(tm => tm.User.ID.IsDefined(out var ID) && ID == _context.User.ID)
+        return app.Team.Members.Any(tm => tm.User.ID.IsDefined(out var ID) && ID == user.ID)
             ? Result.FromSuccess()
             : Result.FromError(new PermissionError("You are not a member of the team."));
     }

@@ -12,6 +12,7 @@ using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Moderation;
 
@@ -41,11 +42,11 @@ public class KickCommand : CommandGroup
     [RequireDiscordPermission(DiscordPermission.KickMembers)]
     public async Task<IResult> Kick([NonSelfActionable] IUser user, [Greedy] string reason = "Not given.")
     {
-        var infractionResult = await _infractions.KickAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+        var infractionResult = await _infractions.KickAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), reason);
         var notified         = infractionResult.Entity.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return await _channels.CreateMessageAsync
-            (_context.ChannelID,
+            (_context.GetChannelID(),
              !infractionResult.IsSuccess
                  ? infractionResult.Error.Message
                  : $"{Emojis.KickEmoji} Kicked **{user.ToDiscordTag()}**! {notified}"

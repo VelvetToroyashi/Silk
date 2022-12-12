@@ -91,96 +91,96 @@ public partial class ConfigCommands
             var now = DateTimeOffset.UtcNow;
             
             var sb = new LineBuilder();
-            var messageRes = await _channels.CreateMessageAsync(_context.ChannelID, InProgressTitle);
+            var messageRes = await _channels.CreateMessageAsync(_context.GetChannelID(), InProgressTitle);
 
             if (!messageRes.IsDefined(out var message))
                 return (Result) messageRes;
             
             sb.AppendLine("\t ➜ Setting up mod-log channel....");
 
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
 
             var currentStep = await CreateModLogChannelAsync();
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
 
             if (!currentStep.IsSuccess)
             {
-                return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, ProgressFailedTitle + sb);
+                return (Result)await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, ProgressFailedTitle + sb);
             }
 
             sb.Commit();
             sb.AppendLine();
             sb.AppendLine("\t ➜ Setting up mod-log channel permissions....");
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             currentStep = await SetModLogChannelPermissionsAsync();
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             if (!currentStep.IsSuccess)
             {
-                return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, ProgressFailedTitle + sb);
+                return (Result)await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, ProgressFailedTitle + sb);
             }
             
             sb.Commit();
             sb.AppendLine();
             sb.AppendLine("\t ➜ Setting logging channel to mod-log channel...");
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             currentStep = await SetLoggingChannelAsync();
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             if (!currentStep.IsSuccess)
             {
-                return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, ProgressFailedTitle + sb);
+                return (Result)await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, ProgressFailedTitle + sb);
             }
             
             sb.Commit();
             sb.AppendLine();
             sb.AppendLine("\t ➜ Setting up invite whitelist...");
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             currentStep = await SetInviteWhitelistAsync();
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             if (!currentStep.IsSuccess)
             {
-                return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, ProgressFailedTitle + sb);
+                return (Result)await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, ProgressFailedTitle + sb);
             }
             
             sb.Commit();
             sb.AppendLine();
             sb.AppendLine("\t ➜ Setting up infraction logging...");
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             currentStep = await SetInfractionLoggingAsync();
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             if (!currentStep.IsSuccess)
             {
-                return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, ProgressFailedTitle + sb);
+                return (Result)await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, ProgressFailedTitle + sb);
             }
             
             sb.Commit();
             sb.AppendLine();
             sb.AppendLine("\t ➜ Setting up phishing detection...");
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
             
             currentStep = await SetPhishingDetectionAsync();
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
 
             if (!currentStep.IsSuccess)
             {
-                return (Result)await _channels.EditMessageAsync(_context.ChannelID, message.ID, ProgressFailedTitle + sb);
+                return (Result)await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, ProgressFailedTitle + sb);
             }
 
             var finish = DateTimeOffset.UtcNow;
@@ -193,21 +193,21 @@ public partial class ConfigCommands
             sb.AppendLine("Use `config view` to view the current configuration.");
             sb.AppendLine("For more information, see the complete setup guide: <https://blog.velvetthepanda.dev/newcomers-of-silk>");
             
-            await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+            await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
 
             async Task<Result> CreateModLogChannelAsync()
             {
                 if (channel is not null)
                 {
                     sb.AppendLine("\t\t ➜ Channel specified, skipping initialization...");
-                    await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+                    await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
                 }
                 else
                 {
                     sb.AppendLine("\t\t ➜ No channel specified, creating one...");
-                    await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+                    await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
                     
-                    var currentChannel = await _channels.GetChannelAsync(_context.ChannelID);
+                    var currentChannel = await _channels.GetChannelAsync(_context.GetChannelID());
 
                     var channelResult = await _guilds.CreateGuildChannelAsync
                     (
@@ -230,7 +230,7 @@ public partial class ConfigCommands
                         return (Result)channelResult;
                     }
                     
-                    await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+                    await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
                 }
 
                 return Result.FromSuccess();
@@ -243,7 +243,7 @@ public partial class ConfigCommands
                 if (!roles.IsSuccess)
                     return (Result)roles;
             
-                var member = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, _context.User.ID, ct: CancellationToken);
+                var member = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, _context.GetUserID(), ct: CancellationToken);
                 
                 if (!member.IsSuccess)
                     return (Result)member;
@@ -351,7 +351,7 @@ public partial class ConfigCommands
             async Task<Result> SetInviteWhitelistAsync()
             {
                 sb.AppendLine("\t\t ➜ Enabling invite whitelist...");
-                await _channels.EditMessageAsync(_context.ChannelID, message.ID, InProgressTitle + sb);
+                await _channels.EditMessageAsync(_context.GetChannelID(), message.ID, InProgressTitle + sb);
 
                 config = await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
                 {

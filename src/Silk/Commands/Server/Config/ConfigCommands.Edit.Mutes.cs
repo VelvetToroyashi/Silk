@@ -11,6 +11,7 @@ using Silk.Data.MediatR.Guilds;
 using Silk.Extensions.Remora;
 using Silk.Shared;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -51,21 +52,21 @@ public partial class ConfigCommands
             var selfPerms = DiscordPermissionSet.ComputePermissions(self.User.Value.ID, roles.First(r => r.ID == _context.GuildID), selfRoles);
 
             if (useNativeMute is not null && useNativeMute.Value && !selfPerms.HasPermission(DiscordPermission.ModerateMembers))
-                return await _channels.CreateMessageAsync(_context.ChannelID, "I don't have permission to timeout members!");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "I don't have permission to timeout members!");
 
             if (mute is not null)
             {
                 if (!selfPerms.HasPermission(DiscordPermission.ManageRoles))
-                    return await _channels.CreateMessageAsync(_context.ChannelID, "I don't have permission to assign roles!");
+                    return await _channels.CreateMessageAsync(_context.GetChannelID(), "I don't have permission to assign roles!");
 
                 if (mute.ID == _context.GuildID)
-                    return await _channels.CreateMessageAsync(_context.ChannelID, "You can't assign the everyone role as a mute role!");
+                    return await _channels.CreateMessageAsync(_context.GetChannelID(), "You can't assign the everyone role as a mute role!");
 
                 if (mute.Position >= selfRoles.Max(r => r.Position))
-                    return await _channels.CreateMessageAsync(_context.ChannelID, "This role is above my highest role! I can't assign it.");
+                    return await _channels.CreateMessageAsync(_context.GetChannelID(), "This role is above my highest role! I can't assign it.");
 
                 if (mute.Permissions.HasPermission(DiscordPermission.SendMessages))
-                    return await _channels.CreateMessageAsync(_context.ChannelID, "This role can send messages. It's not a good idea to assign it to a mute role.");
+                    return await _channels.CreateMessageAsync(_context.GetChannelID(), "This role can send messages. It's not a good idea to assign it to a mute role.");
             }
 
             await _mediator.Send

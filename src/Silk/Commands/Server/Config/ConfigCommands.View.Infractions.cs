@@ -9,6 +9,7 @@ using Remora.Results;
 using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -55,7 +56,7 @@ public partial class ConfigCommands
                               $"**Infraction steps (named):** {infractionStepsNamed}"
             };
 
-            return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
         }
     }
 }

@@ -9,6 +9,7 @@ using Remora.Results;
 using Silk.Extensions;
 using Silk.Services.Bot;
 using Silk.Services.Guild;
+using Silk.Utilities;
 
 namespace Silk.Commands.Interactivity;
 
@@ -42,15 +43,15 @@ public class ReminderModalHandler : InteractionGroup
     [Modal("reminder-modal")]
     public async Task<Result> HandleInteractionAsync(Snowflake reply, string when, string? what = null)
     {
-        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.GetUserID());
         var timeResult = _timeHelper.ExtractTime(when, offset, out _);
 
         if (!timeResult.IsDefined(out var parsedTime))
         {
             var informResult = await _interactions.CreateFollowupMessageAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              timeResult.Error!.Message,
              flags: MessageFlags.Ephemeral,
              ct: this.CancellationToken
@@ -63,8 +64,8 @@ public class ReminderModalHandler : InteractionGroup
         {
             var informResult = await _interactions.CreateFollowupMessageAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "It seems you specified a time in the past.\n" +
              "Please specify a time in the future.",
              flags: MessageFlags.Ephemeral,
@@ -78,8 +79,8 @@ public class ReminderModalHandler : InteractionGroup
         {
             var minTimeResult = await _interactions.CreateFollowupMessageAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "You can't set a reminder less than three minutes!",
              flags: MessageFlags.Ephemeral,
              ct: this.CancellationToken
@@ -90,7 +91,7 @@ public class ReminderModalHandler : InteractionGroup
         
         var reminderTime = DateTimeOffset.UtcNow + parsedTime;
 
-        var messageResult = await _channels.GetChannelMessageAsync(_context.ChannelID, reply, this.CancellationToken);
+        var messageResult = await _channels.GetChannelMessageAsync(_context.GetChannelID(), reply, this.CancellationToken);
         
         if (!messageResult.IsDefined(out var message))
             return Result.FromError(messageResult.Error!);
@@ -98,8 +99,8 @@ public class ReminderModalHandler : InteractionGroup
         await _reminders.CreateReminderAsync
         (
          reminderTime,
-         _context.User.ID,
-         _context.ChannelID,
+         _context.GetUserID(),
+         _context.GetChannelID(),
          null,
          null,
          what,
@@ -110,8 +111,8 @@ public class ReminderModalHandler : InteractionGroup
 
         var res =  await _interactions.CreateFollowupMessageAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          $"Done! I'll remind you {reminderTime.ToTimestamp()}!",
          flags: MessageFlags.Ephemeral,
          ct: this.CancellationToken

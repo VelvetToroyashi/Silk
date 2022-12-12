@@ -23,7 +23,13 @@ public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
 
     public async ValueTask<Result> CheckAsync(NSFWChannelAttribute attribute, CancellationToken ct = default)
     {
-        Result<IChannel> channelRes = await _channelApi.GetChannelAsync(_context.ChannelID, ct);
+        var channelID = _context switch
+        {
+            IInteractionContext interactionContext => interactionContext.Interaction.ChannelID.Value,
+            ITextCommandContext messageContext     => messageContext.Message.ChannelID.Value,
+        };
+        
+        Result<IChannel> channelRes = await _channelApi.GetChannelAsync(channelID, ct);
 
         if (!channelRes.IsSuccess)
             return Result.FromError(channelRes.Error);

@@ -12,6 +12,7 @@ using Silk.Commands.Conditions;
 using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
@@ -47,12 +48,12 @@ public class StrikeCommand : CommandGroup
         string reason = "Not Given."
     )
     {
-        var infractionResult = await _infractions.StrikeAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+        var infractionResult = await _infractions.StrikeAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), reason);
         var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         return await _channels.CreateMessageAsync
             (
-             _context.ChannelID,
+             _context.GetChannelID(),
              !infractionResult.IsSuccess
                  ? infractionResult.Error.Message
                  : $"{Emojis.WarningEmoji} Warned **{user.ToDiscordTag()}**! {notified}");

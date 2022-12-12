@@ -10,6 +10,7 @@ using Remora.Results;
 using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation;
@@ -34,13 +35,13 @@ public class UnbanCommand : CommandGroup
     [Description("Un-bans someone from the current server!")]
     public async Task<IResult> UnbanAsync(IUser user, [Greedy] string reason = "Not Given.")
     {
-        var infractionResult = await _infractions.UnBanAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+        var infractionResult = await _infractions.UnBanAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), reason);
         var notified         = infractionResult.IsDefined(out var result) && result.Notified ? "(User notified via DM)" : "(Failed to DM)";
         
         
         return await _channels.CreateMessageAsync
             (
-             _context.ChannelID,
+             _context.GetChannelID(),
              !infractionResult.IsSuccess
                  ? infractionResult.Error.Message
                  : $"{Emojis.WrenchEmoji} Unbanned **{user.ToDiscordTag()}**! {notified}");

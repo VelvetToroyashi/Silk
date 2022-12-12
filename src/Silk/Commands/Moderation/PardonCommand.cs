@@ -13,6 +13,7 @@ using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Moderation;
 
@@ -50,7 +51,7 @@ public class PardonCommand : CommandGroup
         string reason = "Not Given."
     )
     {
-        var infractionResult = await _infractions.PardonAsync(_context.GuildID.Value, user.ID, _context.User.ID, caseID, reason);
+        var infractionResult = await _infractions.PardonAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), caseID, reason);
 
         var caseMessage = caseID is null
             ? $"Pardoned **{user.ToDiscordTag()}** from their last applicable infraction!"
@@ -58,7 +59,7 @@ public class PardonCommand : CommandGroup
         
         return await _channels.CreateMessageAsync
                 (
-                 _context.ChannelID,
+                 _context.GetChannelID(),
                  !infractionResult.IsSuccess
                      ? infractionResult.Error.Message
                      : $"{Emojis.WrenchEmoji} {caseMessage}"

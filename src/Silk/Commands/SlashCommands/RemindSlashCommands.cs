@@ -19,6 +19,7 @@ using Silk.Extensions;
 using Silk.Extensions.Remora;
 using Silk.Services.Bot;
 using Silk.Services.Guild;
+using Silk.Utilities;
 
 namespace Silk.Commands.SlashCommands;
 
@@ -43,7 +44,8 @@ public class RemindContextCommands : CommandGroup
         {
             new ActionRowComponent(new[]
             {
-               new TextInputComponent("reply", TextInputStyle.Short, "Reply ID (do not modify)", 15, 20, true, _context.Data.AsT0.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), "What did I say? >:C") 
+                //TODO: Improve via caching instead of this
+                new TextInputComponent("reply", TextInputStyle.Short, "Reply ID (do not modify)", 15, 20, true, _context.Interaction.Data.Value.AsT0.Resolved.Value.Messages.Value.Values.First().ID.Value.ToString(), "What did I say? >:C") 
             }),
             new ActionRowComponent(new[]
             {
@@ -57,7 +59,7 @@ public class RemindContextCommands : CommandGroup
 
         var data = new InteractionModalCallbackData(CustomIDHelpers.CreateModalID("reminder-modal"), "Set a reminder!", components);
 
-        return await _interactions.CreateInteractionResponseAsync(_context.ID, _context.Token, new InteractionResponse(InteractionCallbackType.Modal, new(data)));
+        return await _interactions.CreateInteractionResponseAsync(_context.Interaction.ID, _context.Interaction.Token, new InteractionResponse(InteractionCallbackType.Modal, new(data)));
     }
 }
 
@@ -103,30 +105,30 @@ public class RemindSlashCommands : CommandGroup
         string about
     )
     {
-        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.User.ID);
+        var offset     = await _timeHelper.GetOffsetForUserAsync(_context.GetUserID());
         var timeResult = _timeHelper.ExtractTime(rawTime, offset, out _);
 
         if (!timeResult.IsDefined(out var parsedTime))
             return await _interactions.EditOriginalInteractionResponseAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              timeResult.Error!.Message
             );
         
         if (parsedTime <= TimeSpan.Zero)
             return await _interactions.EditOriginalInteractionResponseAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
             "You can't set a reminder in the past!"
             );
         
         if (parsedTime < _minimumReminderTime)
             return await _interactions.EditOriginalInteractionResponseAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              $"You can't set a reminder less than {_minimumReminderTime.Humanize(minUnit: TimeUnit.Minute)}!"
             );
     
@@ -135,32 +137,32 @@ public class RemindSlashCommands : CommandGroup
         await _reminders.CreateReminderAsync
         (
          reminderTime,
-         _context.User.ID,
-         _context.ChannelID,
+         _context.GetUserID(),
+         _context.GetChannelID(),
          null,
-         _context.GuildID.IsDefined(out var guild) ? guild : null,
+         _context.Interaction.GuildID.IsDefined(out var guild) ? guild : null,
          about
         );
 
         return await _interactions.EditOriginalInteractionResponseAsync
-            (
-             _context.ApplicationID,
-             _context.Token,
+        (
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              $"Done! I'll remind you {reminderTime.ToTimestamp()}!"
-            );
+        );
     }
 
     [Command("list")]
     [Description("List all your reminders!")]
     public async Task<IResult> ListRemindersAsync()
     {
-        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).OrderBy(r => r.ExpiresAt);
+        var reminders = (await _reminders.GetUserRemindersAsync(_context.GetUserID())).OrderBy(r => r.ExpiresAt);
         
         if (!reminders.Any())
             return await _interactions.EditOriginalInteractionResponseAsync
                 (
-                 _context.ApplicationID,
-                 _context.Token,
+                 _context.Interaction.ApplicationID,
+                 _context.Interaction.Token,
                  "You don't have any reminders!"
                 );
         
@@ -177,8 +179,8 @@ public class RemindSlashCommands : CommandGroup
         
         return await _interactions.EditOriginalInteractionResponseAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          embeds: new[] { embed }
         );
     }
@@ -191,13 +193,13 @@ public class RemindSlashCommands : CommandGroup
         int reminderID
     )
     {
-        var reminders = (await _reminders.GetUserRemindersAsync(_context.User.ID)).ToArray();
+        var reminders = (await _reminders.GetUserRemindersAsync(_context.GetUserID())).ToArray();
 
         if (!reminders.Any())
             return await _interactions.EditOriginalInteractionResponseAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "You don't have any active reminders!"
             );
 
@@ -206,8 +208,8 @@ public class RemindSlashCommands : CommandGroup
         if (reminder is null)
             return await _interactions.EditOriginalInteractionResponseAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "You don't have a reminder by that ID!"
             );
 
@@ -237,8 +239,8 @@ public class RemindSlashCommands : CommandGroup
 
         return await _interactions.EditOriginalInteractionResponseAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          embeds: new[] { embed }
         );
     }
@@ -253,13 +255,13 @@ public class RemindSlashCommands : CommandGroup
         int reminderID
     )
     {
-        var reminders = await _reminders.GetUserRemindersAsync(_context.User.ID);
+        var reminders = await _reminders.GetUserRemindersAsync(_context.GetUserID());
         
         if (reminders.All(r => r.Id != reminderID))
             return await _interactions.EditOriginalInteractionResponseAsync
             (
-             _context.ApplicationID,
-             _context.Token,
+             _context.Interaction.ApplicationID,
+             _context.Interaction.Token,
              "You don't have any reminders, or at least not one by that ID!"
             );
 
@@ -267,8 +269,8 @@ public class RemindSlashCommands : CommandGroup
         
         return await _interactions.EditOriginalInteractionResponseAsync
         (
-         _context.ApplicationID,
-         _context.Token,
+         _context.Interaction.ApplicationID,
+         _context.Interaction.Token,
          "I've cancelled your reminder!"
         );
     }

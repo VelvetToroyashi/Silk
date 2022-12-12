@@ -74,6 +74,6 @@ public class ShardsCommand : CommandGroup
             Colour = Color.Goldenrod
         };
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        return await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
     }
 }

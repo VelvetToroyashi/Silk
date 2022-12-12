@@ -12,6 +12,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Gateway;
 using Remora.Results;
 using Silk.Data;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.General;
@@ -57,14 +58,14 @@ public class PingCommand : CommandGroup
             }
         };
 
-        var message = await _channels.CreateMessageAsync(_context.ChannelID, embeds: new[] { embed });
+        var message = await _channels.CreateMessageAsync(_context.GetChannelID(), embeds: new[] { embed });
 
         if (!message.IsSuccess)
             return message;
 
         var sw = Stopwatch.StartNew();
         
-        var typing = await _channels.TriggerTypingIndicatorAsync(_context.ChannelID);
+        var typing = await _channels.TriggerTypingIndicatorAsync(_context.GetChannelID());
         
         sw.Stop();
         
@@ -73,7 +74,7 @@ public class PingCommand : CommandGroup
         
         var apiLat = sw.ElapsedMilliseconds.ToString("N0");
 
-        var messageLat = message.Entity.Timestamp - (_context.Message.EditedTimestamp.IsDefined(out var edit) ? edit.Value : _context.MessageID.Timestamp);
+        var messageLat = message.Entity.Timestamp - (_context.Message.EditedTimestamp.IsDefined(out var edit) ? edit.Value : _context.GetMessageID().Timestamp);
         
         embed = embed with
         {
@@ -88,7 +89,7 @@ public class PingCommand : CommandGroup
             }
         };
         
-        return await _channels.EditMessageAsync(_context.ChannelID, message.Entity.ID, embeds: new[] { embed });
+        return await _channels.EditMessageAsync(_context.GetChannelID(), message.Entity.ID, embeds: new[] { embed });
     }
 
     private int GetDbLatency()

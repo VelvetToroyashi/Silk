@@ -13,6 +13,7 @@ using Silk.Data.MediatR.Guilds;
 using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions.Remora;
+using Silk.Utilities;
 using IMessage = Remora.Discord.API.Abstractions.Objects.IMessage;
 
 namespace Silk.Commands.Bot;
@@ -51,31 +52,31 @@ public class PrefixCommand : CommandGroup
     [Description("Gets or sets the current prefix for the guild.")]
     public async Task<Result<IMessage>> SetPrefix(string prefix = "")
     {
-        var member = await _guilds.GetGuildMemberAsync(_context.GuildID.Value, _context.User.ID, this.CancellationToken);
+        var member = await _guilds.GetGuildMemberAsync(_context.GetGuildID(), _context.GetUserID(), this.CancellationToken);
 
         if (!member.IsSuccess)
             return Result<IMessage>.FromError(member.Error);
 
-        var permissionResult = await member.Entity.HasPermissionAsync(_guilds, _context.GuildID.Value, DiscordPermission.ManageChannels);
+        var permissionResult = await member.Entity.HasPermissionAsync(_guilds, _context.GetGuildID(), DiscordPermission.ManageChannels);
         
         if (!permissionResult.IsSuccess)
             return Result<IMessage>.FromError(permissionResult.Error);
 
-        var gprefix = await _cache.RetrievePrefixAsync(_context.GuildID.Value);
+        var gprefix = await _cache.RetrievePrefixAsync(_context.GetGuildID());
         
         if (!permissionResult.Entity || string.IsNullOrEmpty(prefix))
-            return await _channels.CreateMessageAsync(_context.ChannelID, $"I respond to {gprefix}, `/commands` and when you ping me!");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), $"I respond to {gprefix}, `/commands` and when you ping me!");
         
         var prefixCheckResult = IsValidPrefix(prefix);
 
         if (!prefixCheckResult.IsSuccess)
-            return await _channels.CreateMessageAsync(_context.ChannelID, prefixCheckResult.Error.Message);
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), prefixCheckResult.Error.Message);
 
-        await _mediator.Send(new UpdateGuild.Request(_context.GuildID.Value, prefix));
+        await _mediator.Send(new UpdateGuild.Request(_context.GetGuildID(), prefix));
         
-        _cache.UpdatePrefix(_context.GuildID.Value, prefix);
+        _cache.UpdatePrefix(_context.GetGuildID(), prefix);
         
-        return await _channels.CreateMessageAsync(_context.ChannelID, $"Done! I'll respond to `{prefix}` from now on.");
+        return await _channels.CreateMessageAsync(_context.GetChannelID(), $"Done! I'll respond to `{prefix}` from now on.");
     }
 
     private Result IsValidPrefix(string prefix)

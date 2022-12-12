@@ -15,6 +15,7 @@ using Silk.Data.MediatR.Guilds;
 using Silk.Extensions;
 using Silk.Shared;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -47,7 +48,7 @@ public partial class ConfigCommands
         )
         {
             if ((delete ?? aggressive ?? scanOrigin ?? warnOnMatch) is null)
-                return await _channels.CreateMessageAsync(_context.ChannelID, "You must specify at least one option.");
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), "You must specify at least one option.");
             
             await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value)
             {
@@ -91,7 +92,7 @@ public partial class ConfigCommands
             {
                 if (!config.Invites.Whitelist.Any())
                 {
-                    await _channels.CreateMessageAsync(_context.ChannelID, "There are no invites to clear!");
+                    await _channels.CreateMessageAsync(_context.GetChannelID(), "There are no invites to clear!");
                     return Result.FromSuccess();
                 }
 
@@ -99,7 +100,7 @@ public partial class ConfigCommands
 
                 await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) {AllowedInvites = Array.Empty<InviteEntity>().ToList()});
                 
-                await _channels.CreateMessageAsync(_context.ChannelID, $"Here's a dump of the whitelist prior to clearing! \n{inviteString}");
+                await _channels.CreateMessageAsync(_context.GetChannelID(), $"Here's a dump of the whitelist prior to clearing! \n{inviteString}");
 
                 return Result.FromSuccess();
             }
@@ -246,7 +247,7 @@ public partial class ConfigCommands
 
             
             if (messageBuilder.Length > 0)
-                return await _channels.CreateMessageAsync(_context.ChannelID, messageBuilder.ToString());
+                return await _channels.CreateMessageAsync(_context.GetChannelID(), messageBuilder.ToString());
             
             
             return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));

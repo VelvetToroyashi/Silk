@@ -11,11 +11,11 @@ namespace Silk;
 public class SilkTreeNameResolver : ITreeNameResolver
 {
 
-    public async Task<Result<(string TreeName, bool AllowDefaultTree)>> GetTreeNameAsync(ICommandContext context, CancellationToken ct = default)
+    public async Task<Result<string>> GetTreeNameAsync(IOperationContext context, CancellationToken ct = default)
     {
         if (context is MessageContext)
-            return Result<(string, bool)>.FromSuccess((null, true));
+            return Result<string>.FromSuccess(null!);
 
-        else return Result<(string, bool)>.FromSuccess(("silk_slash_tree", false));
+        else return Result<string>.FromSuccess("silk_slash_tree");
     }
 }

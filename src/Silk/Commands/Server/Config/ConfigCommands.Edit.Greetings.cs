@@ -15,6 +15,7 @@ using Silk.Data.MediatR.Greetings;
 using Silk.Data.MediatR.Guilds;
 using Silk.Shared;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Server;
 
@@ -86,7 +87,7 @@ public partial class ConfigCommands
             {
                 if (option is GreetOption.Role && role is null)
                 {
-                    await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a role to check for!");
+                    await _channels.CreateMessageAsync(_context.GetChannelID(), "You must specify a role to check for!");
 
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
@@ -96,11 +97,11 @@ public partial class ConfigCommands
                 if (config.Greetings.FirstOrDefault(g => g.ChannelID == channel.ID) is { } existingGreeting)
                 {
                     await _channels.CreateMessageAsync
-                        (
-                         _context.ChannelID,
+                    (
+                         _context.GetChannelID(),
                          $"There appears to already be a greeting set up for that channel! (ID `{existingGreeting.Id}`)\n\n" +
                          "Consider updating or deleting that greeting instead!"
-                        );
+                    );
 
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
@@ -117,7 +118,7 @@ public partial class ConfigCommands
                 var result = await _mediator.Send(new AddGuildGreeting.Request(greetingDto));
                 if (!result.IsDefined(out var savedGreeting))
                 {
-                    await _channels.CreateMessageAsync(_context.ChannelID, "Failed to create greeting!");
+                    await _channels.CreateMessageAsync(_context.GetChannelID(), "Failed to create greeting!");
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
@@ -126,7 +127,7 @@ public partial class ConfigCommands
                 if (greeting.Length > 2000)
                     message += $"Be warned! This greeting is larger than 2000 characters ({greeting.Length}), and will be placed an embed.";
 
-                await _channels.CreateMessageAsync(_context.ChannelID, message);
+                await _channels.CreateMessageAsync(_context.GetChannelID(), message);
 
                 return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }
@@ -162,14 +163,14 @@ public partial class ConfigCommands
 
                 if (greetingEntity is null)
                 {
-                    await _channels.CreateMessageAsync(_context.ChannelID, "Could not find a greeting with that ID!");
+                    await _channels.CreateMessageAsync(_context.GetChannelID(), "Could not find a greeting with that ID!");
 
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
 
                 if (option is GreetOption.Role && role is null)
                 {
-                    await _channels.CreateMessageAsync(_context.ChannelID, "You must specify a role to check for!");
+                    await _channels.CreateMessageAsync(_context.GetChannelID(), "You must specify a role to check for!");
 
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
@@ -188,7 +189,7 @@ public partial class ConfigCommands
                 if (greeting?.Length > 2000)
                     message += $"Be warned! This greeting is larger than 2000 characters ({greeting.Length}), and will be placed an embed.";
 
-                await _channels.CreateMessageAsync(_context.ChannelID, message);
+                await _channels.CreateMessageAsync(_context.GetChannelID(), message);
 
                 return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }
@@ -206,7 +207,7 @@ public partial class ConfigCommands
 
                 if (greetingEntity is null)
                 {
-                    await _channels.CreateMessageAsync(_context.ChannelID, "I can't seem to find a greeting with that ID!");
+                    await _channels.CreateMessageAsync(_context.GetChannelID(), "I can't seem to find a greeting with that ID!");
 
                     return Result<ReactionResult>.FromSuccess(new(Emojis.DeclineId));
                 }
@@ -215,7 +216,7 @@ public partial class ConfigCommands
 
                 await _mediator.Send(new UpdateGuildConfig.Request(_context.GuildID.Value) { Greetings = config.Greetings });
 
-                await _channels.CreateMessageAsync(_context.ChannelID, $"Deleted greeting with ID `{greetingEntity.Id}`");
+                await _channels.CreateMessageAsync(_context.GetChannelID(), $"Deleted greeting with ID `{greetingEntity.Id}`");
 
                 return Result<ReactionResult>.FromSuccess(new(Emojis.ConfirmId));
             }

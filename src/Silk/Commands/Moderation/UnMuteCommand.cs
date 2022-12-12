@@ -13,6 +13,7 @@ using Silk.Services.Interfaces;
 using Silk.Utilities.HelpFormatter;
 using Silk.Extensions.Remora;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.Moderation;
 
@@ -45,11 +46,11 @@ public class UnMuteCommand : CommandGroup
         string reason = "Not Given."
     )
     {
-        var infractionResult = await _infractions.UnMuteAsync(_context.GuildID.Value, user.ID, _context.User.ID, reason);
+        var infractionResult = await _infractions.UnMuteAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), reason);
         
         return await _channels.CreateMessageAsync
             (
-             _context.ChannelID,
+             _context.GetChannelID(),
              !infractionResult.IsSuccess
                  ? infractionResult.Error.Message
                  : $"{Emojis.UnmuteEmoji} Successfully unmuted **{user.ToDiscordTag()}**!");

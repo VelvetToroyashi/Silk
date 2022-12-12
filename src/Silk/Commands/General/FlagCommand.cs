@@ -11,6 +11,7 @@ using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using Silk.Services.Bot;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 
 namespace Silk.Commands.General;
 
@@ -55,7 +56,7 @@ public class FlagCommand : CommandGroup
         if (emojiOrImageUrl is not { })
         {
             if (!_context.Message.Attachments.IsDefined(out var attachments) || !attachments.Any())
-                return _channels.CreateMessageAsync(_context.ChannelID, $"{Emojis.WarningEmoji} You must specify an image or emoji to apply the overlay to!");
+                return _channels.CreateMessageAsync(_context.GetChannelID(), $"{Emojis.WarningEmoji} You must specify an image or emoji to apply the overlay to!");
             else 
                 return FlagifyImage(flag, attachments.First().Url, intensity, grayscale);
         }
@@ -65,12 +66,12 @@ public class FlagCommand : CommandGroup
         
         // unicode emojis have an id of 0, and do not have a link, so we can't use them
         if (!emoji.ID.IsDefined(out var emojiID))
-            return _channels.CreateMessageAsync(_context.ChannelID,"Unfortunately, unicode emojis do not have a link, and cannot be used. Try uploading an image instead.");
+            return _channels.CreateMessageAsync(_context.GetChannelID(),"Unfortunately, unicode emojis do not have a link, and cannot be used. Try uploading an image instead.");
 
         var emojiLinkResult = CDN.GetEmojiUrl(emojiID.Value, emoji.IsAnimated.IsDefined(out var animated) && animated ? CDNImageFormat.GIF : CDNImageFormat.PNG, 256);
         
         if (!emojiLinkResult.IsSuccess)
-            return _channels.CreateMessageAsync(_context.ChannelID, "I couldn't find the emoji you specified. Try uploading an image instead.");
+            return _channels.CreateMessageAsync(_context.GetChannelID(), "I couldn't find the emoji you specified. Try uploading an image instead.");
         
         return FlagifyImage(flag, emojiLinkResult.Entity.ToString(), intensity, grayscale);
     }
@@ -82,10 +83,10 @@ public class FlagCommand : CommandGroup
     public async Task<Result<IMessage>> FlagifyImage(string type, string imageUrl, float intensity = 100, float grayscale = 0)
     {
         if (intensity is < 50 or > 100)
-            return await _channels.CreateMessageAsync(_context.ChannelID, "Intensity must be between 50 and 100");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "Intensity must be between 50 and 100");
         
         if (grayscale is < 0 or > 100)
-            return await _channels.CreateMessageAsync(_context.ChannelID,"Grayscale must be between 0 and 100");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(),"Grayscale must be between 0 and 100");
         
         intensity /= 100;
         grayscale /= 100;
@@ -106,7 +107,7 @@ public class FlagCommand : CommandGroup
         };
 
         if (!overlay.HasValue)
-            return await _channels.CreateMessageAsync(_context.ChannelID,$"{type} is not a flag I seem to have an overlay for yet. Sorry!");
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), $"{type} is not a flag I seem to have an overlay for yet. Sorry!");
     
         var result = await _flags.GetFlagAsync(imageUrl, overlay.Value, intensity, grayscale);
 
@@ -114,7 +115,7 @@ public class FlagCommand : CommandGroup
         {
             await using var image = result.Entity;
             
-            return await _channels.CreateMessageAsync(_context.ChannelID, "Here you go!", 
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), "Here you go!", 
                                                       attachments: new OneOf<FileData, IPartialAttachment>[]
                                                       {
                                                           new FileData("output.png", image, $"Flag type: {overlay}, Intensity: {(intensity * 100):N0}%, Grayscale: {(grayscale * 100):N0}%")
@@ -122,7 +123,7 @@ public class FlagCommand : CommandGroup
         }
         else
         {
-            return await _channels.CreateMessageAsync(_context.ChannelID, result.Error.Message);
+            return await _channels.CreateMessageAsync(_context.GetChannelID(), result.Error.Message);
         }
     }
 }

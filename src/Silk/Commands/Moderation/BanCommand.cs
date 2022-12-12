@@ -13,6 +13,7 @@ using Silk.Commands.Conditions;
 using Silk.Extensions.Remora;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
+using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
 namespace Silk.Commands.Moderation
@@ -61,12 +62,12 @@ namespace Silk.Commands.Moderation
             string reason = "Not Given."
         )
         {
-            var infractionResult = await _infractions.BanAsync(_context.GuildID.Value, user.ID, _context.User.ID, days, reason, banDuration);
+            var infractionResult = await _infractions.BanAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), days, reason, banDuration);
             var notified         = infractionResult.Entity.Notified ? "(User notified with DM)" : "(Failed to DM)";
             
             return await _channels.CreateMessageAsync
                 (
-                 _context.ChannelID,
+                 _context.GetChannelID(),
                  !infractionResult.IsSuccess
                      ? infractionResult.Error.Message
                      : $"{Emojis.BanEmoji} Banned **{user.ToDiscordTag()}**! {notified}"
