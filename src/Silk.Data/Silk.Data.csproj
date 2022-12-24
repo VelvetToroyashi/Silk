@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.8.1" />
-        <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="7.0.0-beta.2" />
+        <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="7.0.0" />
         <PackageReference Include="Mapster" Version="7.3.0" />
         <PackageReference Include="Mapster.DependencyInjection" Version="1.0.0" />
         <PackageReference Include="Mediator.Abstractions" Version="2.1.0-preview.5" />
