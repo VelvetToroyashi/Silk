@@ -45,7 +45,7 @@
         <PackageReference Update="Serilog.Sinks.Console" Version="4.1.0" />
 
         <PackageReference Update="Microsoft.EntityFrameworkCore" Version="7.0.2"/>
-        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1"/>
+        <PackageReference Update="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="7.0.2"/>
         <PackageReference Update="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.2" />
         <PackageReference Update="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.2" />
