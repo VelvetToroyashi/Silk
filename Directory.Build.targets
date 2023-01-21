@@ -9,7 +9,7 @@
         <PackageReference Update="Remora.Results" Version="7.2.3" />
         <PackageReference Update="Remora.Commands" Version="10.0.3" />
         <PackageReference Update="Remora.Discord.Hosting" Version="6.0.4" />
-        <PackageReference Update="Remora.Discord.Gateway" Version="11.0.3" />
+        <PackageReference Update="Remora.Discord.Gateway" Version="11.0.5" />
         <PackageReference Update="Remora.Discord.Commands" Version="26.2.2" />
         <PackageReference Update="Remora.Discord.Caching" Version="33.0.1" />
         <PackageReference Update="Remora.Discord.Caching.Redis" Version="1.1.2" />
