@@ -72,7 +72,7 @@
         <PackageReference Include="Remora.Discord.Pagination" Version="3.0.15" />
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
-        <PackageReference Include="Sentry" Version="3.26.2" />
+        <PackageReference Include="Sentry" Version="3.27.1" />
         <PackageReference Include="Sentry.DiagnosticSource" Version="3.27.1" />
         <PackageReference Include="Sentry.Extensions.Logging" Version="3.26.2" />
         <PackageReference Include="Sentry.Serilog" Version="3.26.2" />
