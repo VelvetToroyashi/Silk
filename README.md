@@ -1,6 +1,6 @@
 # Silk!
 
-Silk! is a simple and the fastest Discord bot written in C# until proven otherwise. Silk! is built on top of the [Remora.Discord](https://github.com/Nihlus/Remora.Discord) .NET Discord library, with the goal to not only be a great bot but to also fill in the gaps that some bots have. Silk! aims to be a bot your members will want to use, while not being a cookie-cutter game, moderation, or entertainment bot. Silk! is also made with large guilds in mind. Feel free to join the [Silk! Server](https://silkbot.cc/discord) to ask any questions you may have or any general support you may need. Want this bot on your server? [Feel free to invite it!](https://silkbot.cc/invite)
+Silk! is a simple Discord bot written in C#. Silk! is built on top of the [Remora.Discord](https://github.com/Nihlus/Remora.Discord) .NET Discord library, with the goal to not only be a great bot but to also fill in the gaps that some bots have. Silk! aims to be a bot your members will want to use, while not being a cookie-cutter game, moderation, or entertainment bot. Silk! is also made with large guilds in mind. Feel free to join the [Silk! Server](https://silkbot.cc/discord) to ask any questions you may have or any general support you may need. Want this bot on your server? [Feel free to invite it!](https://silkbot.cc/invite)
 
 [![Code Quality](https://www.codefactor.io/repository/github/VTPDevelopment/Silk/badge)](https://www.codefactor.io/repository/github/VTPDevelopment/silk)  
 ![Code Size](https://img.shields.io/github/languages/code-size/VTPDevelopment/Silk)  
