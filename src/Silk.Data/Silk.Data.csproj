@@ -11,7 +11,7 @@
         <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="7.0.0" />
         <PackageReference Include="Mapster" Version="7.3.0" />
         <PackageReference Include="Mapster.DependencyInjection" Version="1.0.0" />
-        <PackageReference Include="Mediator.Abstractions" Version="2.1.0-preview.10" />
+        <PackageReference Include="Mediator.Abstractions" Version="2.1.0-preview.11" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
