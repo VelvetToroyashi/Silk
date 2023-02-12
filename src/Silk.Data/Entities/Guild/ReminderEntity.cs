@@ -26,6 +26,11 @@ public class ReminderEntity
     public bool IsPrivate { get; set; }
     
     /// <summary>
+    /// Whether this reminder should be sent with `SUPPRESS_NOTIFICATIONS` flag set on the message
+    /// </summary>
+    public bool IsQuiet { get; set; }
+    
+    /// <summary>
     /// Whether the reminder message was a reply to another message.
     /// </summary>
     public bool IsReply { get; set; }

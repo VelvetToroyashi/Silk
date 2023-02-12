@@ -169,6 +169,8 @@ public sealed class ReminderService : IHostedService
         (
             reminder.ChannelID,
             dispatchMessage,
+            // 1 << 12 is SupressNotifications
+            flags: reminder.IsQuiet ? (MessageFlags) (1 << 12) : default,
             allowedMentions: 
             new AllowedMentions
             (
@@ -296,13 +298,16 @@ public sealed class ReminderService : IHostedService
             return Result.FromError(channelRes.Error);
         }
 
-        Result<IMessage> messageRes = await _channels.CreateMessageAsync(channelRes.Entity.ID, message);
+        var flags = reminder.IsQuiet ? (MessageFlags) (1 << 12) : default;
+        
+        Result<IMessage> messageRes = await _channels.CreateMessageAsync(channelRes.Entity.ID, message, flags: flags);
 
         if (!messageRes.IsSuccess)
         {
             _logger.LogError(EventIds.Service, "Failed to dispatch reminder to {Owner}.", reminder.OwnerID);
             return Result.FromError(messageRes.Error);
         }
+        
         _logger.LogDebug(EventIds.Service, "Successfully dispatched reminder in {ExecutionTime:N0} ms.", (DateTimeOffset.UtcNow - now).TotalMilliseconds);
         return Result.FromSuccess();
     }
