@@ -102,7 +102,11 @@ public class RemindSlashCommands : CommandGroup
         
         [Option("about")]
         [Description("What should I remind you about?")]
-        string about
+        string about,
+        
+        [Option("silent")]
+        [Description("Should this reminder be delivered quietly?")]
+        bool silent = false
     )
     {
         var offset     = await _timeHelper.GetOffsetForUserAsync(_context.GetUserID());
@@ -141,7 +145,8 @@ public class RemindSlashCommands : CommandGroup
          _context.GetChannelID(),
          null,
          _context.Interaction.GuildID.IsDefined(out var guild) ? guild : null,
-         about
+         about,
+         isSilent: silent
         );
 
         return await _interactions.EditOriginalInteractionResponseAsync

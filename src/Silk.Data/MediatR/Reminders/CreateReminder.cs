@@ -24,7 +24,8 @@ public static class CreateReminder
         string?        MessageContent,
         Snowflake?     ReplyID             = null,
         Snowflake?     ReplyAuthorID       = null,
-        string?        ReplyMessageContent = null
+        string?        ReplyMessageContent = null,
+        bool           IsSilent            = false
     ) : IRequest<ReminderEntity>;
 
     /// <summary>
@@ -56,6 +57,7 @@ public static class CreateReminder
                 ReplyMessageContent = request.ReplyMessageContent,
                 IsPrivate           = request.MessageID is null || request.GuildID is null,
                 IsReply             = request.ReplyID is not null,
+                IsQuiet             = request.IsSilent
             };
 
             db.Add(reminder);

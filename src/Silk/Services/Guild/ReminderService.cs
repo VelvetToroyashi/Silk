@@ -67,10 +67,11 @@ public sealed class ReminderService : IHostedService
         string?        content,
         string?        replyContent  = null,
         Snowflake?     replyID       = null,
-        Snowflake?     replyAuthorID = null
+        Snowflake?     replyAuthorID = null,
+        bool           isSilent = false
     )
     {
-        ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent));
+        ReminderEntity reminder = await _mediator.Send(new CreateReminder.Request(expiry, ownerID, channelID, messageID, guildID, content, replyID, replyAuthorID, replyContent, isSilent));
         _reminders.Add(reminder);
         SilkMetric.LoadedReminders.Inc();
         _logger.LogDebug("Created reminder {ReminderID}", reminder.Id);

@@ -77,6 +77,13 @@ public class ReminderCommands : CommandGroup
         Reminders like "tonight at 8PM" will use your local time,
         otherwise UTC is used.
         """;
+    
+    private const string SilentReminderDescription = 
+        """
+        Controls whether the reminder is sent silently. 
+        Silent reminders still mention you, but unlike normal reminders,
+        they do not generate a push notification. Useful for leisurely reminders.
+        """;
 
     private readonly ReminderActionCommands _reminderCommands;
 
@@ -88,7 +95,7 @@ public class ReminderCommands : CommandGroup
     [Command("remind")]
     [ExcludeFromCodeCoverage]
     [Description(ReminderDescription)]
-    public Task<IResult> Remind([Greedy] string reminder) => _reminderCommands.RemindAsync(reminder);
+    public Task<IResult> Remind([Greedy] string reminder, [Switch('s', "silent")]bool silent = false) => _reminderCommands.RemindAsync(reminder, silent);
     
 
     [Group("remind")]
@@ -128,7 +135,10 @@ public class ReminderCommands : CommandGroup
         (
             [Greedy]
             [Description(ReminderDescription)]
-            string reminder
+            string reminder,
+            [Switch('s', "silent")]
+            [Description(SilentReminderDescription)]
+            bool silent = false
         )
         {
             var offset     = await _timeHelper.GetOffsetForUserAsync(_context.GetUserID());
@@ -151,15 +161,16 @@ public class ReminderCommands : CommandGroup
             
             await _reminders.CreateReminderAsync
             (
-             reminderTime,
-             _context.GetUserID(),
-             _context.GetChannelID(),
-             _context.GetMessageID(),
-             guildID,
-             reminder,
-             reply?.Content,
-             reply?.ID, 
-             reply?.Author.ID
+                 reminderTime,
+                 _context.GetUserID(),
+                 _context.GetChannelID(),
+                 _context.GetMessageID(),
+                 guildID,
+                 reminder,
+                 reply?.Content,
+                 reply?.ID, 
+                 reply?.Author.ID,
+                 silent
             );
             
             return await _channels.CreateMessageAsync(_context.GetChannelID(), $"I'll remind you {reminderTime.ToTimestamp()}!");
