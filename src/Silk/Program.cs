@@ -40,7 +40,6 @@ public class Program
 {
     public static async Task Main()
     {
-        
         IHostBuilder? hostBuilder = Host
                                    .CreateDefaultBuilder()
                                    .UseConsoleLifetime();

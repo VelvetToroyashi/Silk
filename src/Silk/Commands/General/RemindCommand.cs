@@ -10,6 +10,7 @@ using Humanizer;
 using Humanizer.Localisation;
 using Remora.Commands.Attributes;
 using Remora.Commands.Results;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
@@ -107,7 +108,7 @@ public class ReminderCommands : CommandGroup
         private readonly TimeSpan _minimumReminderTime = TimeSpan.FromMinutes(0.01);
         
         private readonly ReminderService        _reminders;
-        private readonly MessageContext         _context;
+        private readonly ITextCommandContext     _context;
         private readonly IDiscordRestChannelAPI _channels;
         private readonly FeedbackService        _interactivity;
         private readonly TimeHelper             _timeHelper;
@@ -116,7 +117,7 @@ public class ReminderCommands : CommandGroup
         public ReminderActionCommands
         (
             ReminderService        reminders,
-            MessageContext         context,
+            ITextCommandContext context,
             IDiscordRestChannelAPI channels,
             FeedbackService        interactivity,
             TimeHelper             timeHelper
