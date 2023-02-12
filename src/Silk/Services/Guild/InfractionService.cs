@@ -672,7 +672,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (result.Error is not RestResultError<RestError> re)
             return result.Error!;
 
-        return re.Error.Code switch
+        return re.Error.Code.OrDefault() switch
         {
             DiscordError.MissingAccess => new PermissionError($"I don't have permission to {actionName} people!"),
             DiscordError.UnknownUser   => new NotFoundError("That user doesn't seem to exist! Are you sure you typed their ID correctly?"),

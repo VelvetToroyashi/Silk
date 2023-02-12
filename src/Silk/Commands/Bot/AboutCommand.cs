@@ -57,54 +57,54 @@ public class AboutCommand : CommandGroup
         _plugins      = plugins;
     }
     
-    [Command("about")]
-    [Description("Shows relevant information, data and links about Silk!")]
-    public async Task<Result> SendBotInfo()
+[Command("about")]
+[Description("Shows relevant information, data and links about Silk!")]
+public async Task<Result> SendBotInfo()
+{
+    var appResult = await _oauthApi.GetCurrentBotApplicationInformationAsync();
+
+    if (!appResult.IsDefined(out var app))
+        return (Result)appResult;
+
+    Version? remora = typeof(DiscordGatewayClient).Assembly.GetName().Version;
+
+    var db = _redis.GetDatabase();
+    var guilds = (string?)await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
+
+    if (guilds is null)
+        return Result.FromError(new InvalidOperationError("Could not retrieve guild count from Redis."));
+
+    var infoEmbed = new Embed
     {
-        var appResult = await _oauthApi.GetCurrentBotApplicationInformationAsync();
-
-        if (!appResult.IsDefined(out var app))
-            return (Result)appResult;
-
-        Version? remora = typeof(DiscordGatewayClient).Assembly.GetName().Version;
-
-        var db = _redis.GetDatabase();
-        var guilds = (string?)await db.StringGetAsync(ShardHelper.GetShardGuildCountStatKey(_shard.ShardID));
-
-        if (guilds is null)
-            return Result.FromError(new InvalidOperationError("Could not retrieve guild count from Redis."));
-
-        var infoEmbed = new Embed
+        Title  = "About Silk!",
+        Colour = Color.Gold,
+        Fields = new IEmbedField[]
         {
-            Title  = "About Silk!",
-            Colour = Color.Gold,
-            Fields = new IEmbedField[]
-            {
-                new EmbedField("Guild Count:", guilds, true),
-                new EmbedField("Owners:", app.Team is null ? app.Owner!.Username.Value : app.Team?.Members.Select(t => t.User.Username.Value).Join(", ") ?? "Unknown", true),
-                new EmbedField("Remora Version:", remora?.ToString() ?? "Unknown", true),
-                new EmbedField("Silk! Core:", StringConstants.Version, true)
-            }
-        };
-        
-        var invite = $"https://discord.com/api/oauth2/authorize?client_id={app.ID}&permissions=1100484045846&scope=bot%20applications.commands";
-        
-        var res = await _channelApi.CreateMessageAsync
-        (
-         _context.GetChannelID(),
-         embeds: new[] { infoEmbed, GetPluginInfoEmbed() },
-         components: new IMessageComponent[]
+            new EmbedField("Guild Count:", guilds, true),
+            new EmbedField("Owners:", app.Team is null ? app.Owner!.Value.Username.Value : app.Team?.Members.Select(t => t.User.Username.Value).Join(", ") ?? "Unknown", true),
+            new EmbedField("Remora Version:", remora?.ToString() ?? "Unknown", true),
+            new EmbedField("Silk! Core:", StringConstants.Version, true)
+        }
+    };
+    
+    var invite = $"https://discord.com/api/oauth2/authorize?client_id={app.ID}&permissions=1100484045846&scope=bot%20applications.commands";
+    
+    var res = await _channelApi.CreateMessageAsync
+    (
+     _context.GetChannelID(),
+     embeds: new[] { infoEmbed, GetPluginInfoEmbed() },
+     components: new IMessageComponent[]
+     {
+         new ActionRowComponent(new IMessageComponent[]
          {
-             new ActionRowComponent(new IMessageComponent[]
-             {
-                 new ButtonComponent(ButtonComponentStyle.Link, "Invite", URL: invite),
-                 new ButtonComponent(ButtonComponentStyle.Link, "Source", URL: "https://silkbot.cc/src/"),
-                 new ButtonComponent(ButtonComponentStyle.Link, "Support", URL: StringConstants.SupportInvite)
-             })
-         });
+             new ButtonComponent(ButtonComponentStyle.Link, "Invite", URL: invite),
+             new ButtonComponent(ButtonComponentStyle.Link, "Source", URL: "https://silkbot.cc/src/"),
+             new ButtonComponent(ButtonComponentStyle.Link, "Support", URL: StringConstants.SupportInvite)
+         })
+     });
 
-        return (Result)res;
-    }
+    return (Result)res;
+}
 
     private IEmbed GetPluginInfoEmbed()
     {

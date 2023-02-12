@@ -10,6 +10,7 @@ using Remora.Results;
 using Silk.Extensions;
 using Silk.Services.Interfaces;
 using OneOf;
+using Remora.Discord.Caching.Abstractions;
 using Remora.Discord.Commands.Attributes;
 using Remora.Discord.Commands.Conditions;
 using Remora.Rest.Core;
@@ -51,7 +52,9 @@ public class MemberScanButtonHandler : InteractionGroup
     [Button("member-check::dump")]
     public async Task<Result> DumpAsync()
     {
-        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members", CancellationToken);
+        var key = CacheKey.StringKey($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members");
+        
+        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>(key, CancellationToken);
         
         if (!idCheck.IsDefined(out var IDs))
             return (Result)await _interactions.CreateFollowupMessageAsync
@@ -79,7 +82,9 @@ public class MemberScanButtonHandler : InteractionGroup
     [Button("member-check::kick")]
     public async Task<Result> KickAsync()
     {
-        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members", CancellationToken);
+        var key = CacheKey.StringKey($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members");
+        
+        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>(key, CancellationToken);
         
         var components = ((IPartialActionRowComponent)_context.Interaction.Message.Value.Components.Value[0]).Components.Value;
         
@@ -130,10 +135,9 @@ public class MemberScanButtonHandler : InteractionGroup
     [Button("member-check::ban")]
     public async Task<Result> BanAsync()
     {
-        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members", CancellationToken);
-        
-        var components = ((IPartialActionRowComponent)_context.Interaction.Message.Value.Components.Value[0]).Components.Value;
-        
+        var key = CacheKey.StringKey($"Silk:SuspiciousMemberCheck:{_context.Interaction.GuildID.Value}:Members");
+        var idCheck = await _cache.TryGetValueAsync<IReadOnlyList<Snowflake>>(key, CancellationToken);
+
         if (!idCheck.IsDefined(out var IDs))
             return (Result)await _interactions.CreateFollowupMessageAsync
             (

@@ -37,7 +37,7 @@ public class ReadyUserCacher : IResponder<IReady>
         var db = _redis.GetDatabase();
         await db.StringSetAsync(ShardHelper.GetShardUserCountStatKey(_shard.ShardID), 0);
         
-        await _cache.CacheAsync(KeyHelpers.CreateCurrentUserCacheKey(), gatewayEvent.User, ct);
+        await _cache.CacheAsync(new KeyHelpers.CurrentUserCacheKey(), gatewayEvent.User, ct);
         
         return Result.FromSuccess();
     }

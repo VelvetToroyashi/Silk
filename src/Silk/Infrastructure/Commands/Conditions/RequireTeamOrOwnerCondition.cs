@@ -41,7 +41,7 @@ public class RequireTeamOrOwnerCondition : ICondition<RequireTeamOrOwnerAttribut
         var app = appResult.Entity;
 
         if (app.Team is null)
-            return (app.Owner?.ID.IsDefined(out var ID) ?? false) && ID == user.ID
+            return (app.Owner.Value?.ID.IsDefined(out var ID) ?? false) && ID == user.ID
                 ? Result.FromSuccess()
                 : Result.FromError(new PermissionError("You are not an owner of the application."));
         

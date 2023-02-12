@@ -71,7 +71,7 @@ public class GuildCacherService
         _logger     = logger;
     }
 
-    public async Task<Result> GreetGuildAsync(IGuildCreate guild)
+    public async Task<Result> GreetGuildAsync(IGuildCreate.IAvailableGuild guild)
     {
         var currentUserResult = await _users.GetCurrentUserAsync();
 

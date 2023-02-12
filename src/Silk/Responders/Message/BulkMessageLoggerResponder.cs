@@ -61,7 +61,8 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
         if (!guildConfig.Logging.LogMessageDeletes)
             return Result.FromSuccess();
 
-        var auditLogs = await _auditLogs.GetAuditLogAsync(guildID, actionType: AuditLogEvent.MessageBulkDelete, limit: 1, ct: ct);
+        //TODO: Listen for GUILD_AUDIT_LOG_CREATE and use that instead of fetching the audit log
+        var auditLogs = await _auditLogs.GetGuildAuditLogAsync(guildID, actionType: AuditLogEvent.MessageBulkDelete, limit: 1, ct: ct);
 
         IUser? user = null;
 
@@ -104,7 +105,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
         for (var i = IDs.Count - 1; i >= 0; i--)
         {
             var ID  = IDs[i];
-            var key = KeyHelpers.CreateMessageCacheKey(channelID, ID);
+            var key = new KeyHelpers.MessageCacheKey(channelID, ID);
 
             if (!(await _cache.TryGetPreviousValueAsync<IMessage>(key)).IsDefined(out var message) && !(await _cache.TryGetValueAsync<IMessage>(key)).IsDefined(out message))
             {
@@ -116,7 +117,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
 
             if (message.MessageReference.IsDefined(out var reference))
             {
-                var replyKey = KeyHelpers.CreateMessageCacheKey(channelID, reference.MessageID.Value);
+                var replyKey = new KeyHelpers.MessageCacheKey(channelID, reference.MessageID.Value);
                 var replyResult = await _cache.TryGetPreviousValueAsync<IMessage>(replyKey);
 
                 if (!replyResult.IsDefined(out var reply))
@@ -125,7 +126,7 @@ public class BulkMessageLoggerResponder : IResponder<IMessageDeleteBulk>
                 }
                 else
                 {
-                    sb.Append($"➜ Replying to {reply!.Author.ToDiscordTag()} {reply.Author.ID} [{reply.ID}]: ");
+                    sb.Append($"➜ Replying to {reply.Author.ToDiscordTag()} {reply.Author.ID} [{reply.ID}]: ");
                     sb.AppendLine($"{(string.IsNullOrEmpty(message.Content) ? "Message did not contain content" : reply.Content.Truncate(120, "[...]"))}");
                 }
             }

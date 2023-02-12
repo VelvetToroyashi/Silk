@@ -135,7 +135,7 @@ public class ChannelLoggingService : IChannelLoggingService
             return;
         }
 
-        switch (re.Error.Code)
+        switch (re.Error.Code.OrDefault())
         {
             case DiscordError.MissingAccess:
             case DiscordError.MissingPermission:

@@ -23,7 +23,7 @@ public class LateBoundMessageRecacher : IResponder<IMessageUpdate>
         if (!gatewayEvent.ID.IsDefined(out var message))
             return Result.FromSuccess();
 
-        var key = KeyHelpers.CreateMessageCacheKey(channel, message);
+        var key = new KeyHelpers.MessageCacheKey(channel, message);
 
         var cachedResult = await _cache.TryGetValueAsync<IMessage>(key, ct);
         
@@ -40,6 +40,7 @@ public class LateBoundMessageRecacher : IResponder<IMessageUpdate>
          gatewayEvent.EditedTimestamp.HasValue ? gatewayEvent.EditedTimestamp.Value : cached.EditedTimestamp,
          cached.IsTTS,
          cached.MentionsEveryone,
+         gatewayEvent.Mentions.IsDefined(out var mentions) ? mentions : cached.Mentions,
          gatewayEvent.MentionedRoles.IsDefined(out var mentionRoles) ? mentionRoles : cached.MentionedRoles,
          gatewayEvent.MentionedChannels.HasValue ? gatewayEvent.MentionedChannels : cached.MentionedChannels,
          gatewayEvent.Attachments.IsDefined(out var attachments) ? attachments : cached.Attachments,

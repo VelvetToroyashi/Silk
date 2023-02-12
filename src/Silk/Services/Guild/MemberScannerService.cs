@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Caching.Abstractions;
 using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Caching.Services;
 using Remora.Rest;
@@ -86,7 +87,8 @@ public class MemberScannerService
 
         await db.StringSetAsync($"Silk:SuspiciousMemberCheck:{guildID}", DateTimeOffset.UtcNow.ToString());
         
-        await _cache.CacheAsync<IReadOnlyList<Snowflake>>($"Silk:SuspiciousMemberCheck:{guildID}:Members", phishing, ct);
+        var key = CacheKey.StringKey($"Silk:SuspiciousMemberCheck:{guildID}:Members");
+        await _cache.CacheAsync<IReadOnlyList<Snowflake>>(key, phishing, ct);
         
         _logger.LogDebug("Cached members list");
         

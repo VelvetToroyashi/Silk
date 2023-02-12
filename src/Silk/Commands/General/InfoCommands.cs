@@ -14,6 +14,7 @@ using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Caching;
+using Remora.Discord.Caching.Abstractions;
 using Remora.Discord.Caching.Abstractions.Services;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
@@ -342,7 +343,7 @@ public class InfoCommands : CommandGroup
         return Result<string>.FromSuccess(sb.ToString());
     }
 
-    private async Task UncacheUserAsync(Snowflake userID) => await _cache.EvictAsync(KeyHelpers.CreateUserCacheKey(userID));
+    private async Task UncacheUserAsync(Snowflake userID) => await _cache.EvictAsync(new KeyHelpers.UserCacheKey(userID));
 
     private async Task<Stream> GenerateRoleColorSwatchAsync(Color roleColor)
     {
@@ -359,8 +360,10 @@ public class InfoCommands : CommandGroup
     
     private async Task<Stream> GenerateBannerColorImageAsync(Color bannerColor)
     {
+        var key = CacheKey.StringKey($"Color:{bannerColor.ToArgb()}");
+        
         // Can you even serialize a memory stream??
-        var cacheResult = await _cache.RetrieveAsync<byte[]>($"Color:{bannerColor.ToArgb()}");
+        var cacheResult = await _cache.RetrieveAsync<byte[]>(key);
 
         if (cacheResult.IsDefined(out var bytes))
         {
@@ -375,7 +378,7 @@ public class InfoCommands : CommandGroup
 
         stream.Seek(0, SeekOrigin.Begin);
         
-        await _cache.CacheAsync($"Color:{bannerColor.ToArgb()}", stream.ToArray(), DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
+        await _cache.CacheAsync(key, stream.ToArray(), new() { AbsoluteExpiration = DateTimeOffset.UtcNow + TimeSpan.FromHours(1) });
         
         return stream;
     }

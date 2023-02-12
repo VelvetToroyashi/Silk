@@ -116,7 +116,7 @@ public class PhishingDetectionService
         if (user.Avatar is null) // No avatar, no need to check.
             return Result.FromSuccess();
         
-        var priorUserResult = await _cache.TryGetPreviousValueAsync<IUser>(KeyHelpers.CreateUserCacheKey(user.ID));
+        var priorUserResult = await _cache.TryGetPreviousValueAsync<IUser>(new KeyHelpers.UserCacheKey(user.ID));
 
         if (priorUserResult.IsDefined(out var priorUser) && !user.Avatar.Value.Equals(priorUser.Avatar?.Value)) // If the avatar hasn't changed, we don't care about this update.
             return Result.FromSuccess();
@@ -162,7 +162,7 @@ public class PhishingDetectionService
     {
         if (!bypass)
         {
-            var userBefore = await _cache.TryGetPreviousValueAsync<IUser>(KeyHelpers.CreateUserCacheKey(user.ID));
+            var userBefore = await _cache.TryGetPreviousValueAsync<IUser>(new KeyHelpers.UserCacheKey(user.ID));
         
             if (!userBefore.IsDefined(out var priorUser) ||  user.Username == priorUser.Username)
                 return Result.FromSuccess();

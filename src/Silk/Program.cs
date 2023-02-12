@@ -182,18 +182,18 @@ public class Program
     {
         try
         {
-            using var serviceScope = builtBuilder.Services.CreateScope();
+                                                    using var serviceScope = builtBuilder.Services.CreateScope();
 
-            await using var dbContext = await serviceScope
-                                       .ServiceProvider
-                                       .GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContextAsync();
+                                                    await using var dbContext = await serviceScope
+                                                                               .ServiceProvider
+                                                                               .GetRequiredService<IDbContextFactory<GuildContext>>().CreateDbContextAsync();
 
-            var pendingMigrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToList();
+                                                    //var pendingMigrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToList();
 
-            if (pendingMigrations.Any())
+            //if (pendingMigrations.Any())
                 await dbContext.Database.MigrateAsync();
 
-            return Result<int>.FromSuccess(pendingMigrations.Count);
+            return Result<int>.FromSuccess(1);
         }
         catch (Exception e)
         {

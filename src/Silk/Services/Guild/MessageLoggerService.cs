@@ -69,7 +69,7 @@ public class MessageLoggerService
         if (exempt)
             return Result.FromSuccess();
 
-        var cacheResult = await _cache.TryGetValueAsync<IMessage>(KeyHelpers.CreateMessageCacheKey(channelID, message.ID.Value));
+        var cacheResult = await _cache.TryGetValueAsync<IMessage>(new KeyHelpers.MessageCacheKey(channelID, message.ID.Value));
         
         var beforeContent = !cacheResult.IsDefined(out var previousMessage) 
             ? "It doesn't seem I was around when this happened. Sorry." 
@@ -158,7 +158,7 @@ public class MessageLoggerService
 
     public async Task<Result> LogDeleteAsync(IMessageDelete message)
     {
-        var key = KeyHelpers.CreateMessageCacheKey(message.ChannelID, message.ID);
+        var key = new KeyHelpers.MessageCacheKey(message.ChannelID, message.ID);
         
         if (!(await _cache.TryGetValueAsync<IMessage>(key)).IsDefined(out var cachedMessage))
             return Result.FromSuccess();

@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Commands.Contexts;
+using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Services;
 using Remora.Rest.Core;
 using Remora.Results;
@@ -27,8 +28,8 @@ public class PostCommandReactionHandler : IPostExecutionEvent
         
         await _channels.CreateReactionAsync
         (
-         context.ChannelID,
-         mc.MessageID,
+         mc.Message.ChannelID.Value,
+         mc.Message.ID.Value,
          (re.Entity ?? re.Error as ReactionResult)!.Reaction.TryPickT0(out Snowflake snowflake, out var ulongOrRaw) 
              ? $"_:{snowflake}" 
              : ulongOrRaw.TryPickT0(out var id, out var unicode) 
@@ -39,7 +40,12 @@ public class PostCommandReactionHandler : IPostExecutionEvent
 
         if ((re.Entity ?? re.Error as ReactionResult)!.Message.IsDefined(out var message))
         {
-            await _channels.CreateMessageAsync(context.ChannelID, message, ct: ct);
+            if (!context.TryGetChannelID(out var cid))
+            {
+                return Result.FromSuccess();
+            }
+            
+            await _channels.CreateMessageAsync(cid.Value, message, ct: ct);
         }
         
         return Result.FromSuccess();
