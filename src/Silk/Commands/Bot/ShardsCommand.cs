@@ -19,14 +19,14 @@ namespace Silk.Commands.Bot;
 
 public class ShardsCommand : CommandGroup
 {
-    private readonly MessageContext         _context;
+    private readonly ITextCommandContext         _context;
     private readonly IShardIdentification   _shard;
     private readonly IDiscordRestChannelAPI _channels;
     private readonly IConnectionMultiplexer _redis;
     
     public ShardsCommand
     (
-        MessageContext context,
+        ITextCommandContext context,
         IShardIdentification shard,
         IDiscordRestChannelAPI channels,
         IConnectionMultiplexer redis

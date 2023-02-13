@@ -16,7 +16,7 @@ public partial class ConfigCommands
     public partial class EditConfigCommands : CommandGroup
     {
         private readonly IMediator              _mediator;
-        private readonly MessageContext         _context;
+        private readonly ITextCommandContext         _context;
         private readonly IDiscordRestGuildAPI   _guilds;
         private readonly IDiscordRestUserAPI    _users;
         private readonly IDiscordRestInviteAPI  _invites;
@@ -25,7 +25,7 @@ public partial class ConfigCommands
         public EditConfigCommands
         (
             IMediator              mediator,
-            MessageContext         context,
+            ITextCommandContext         context,
             IDiscordRestGuildAPI   guilds,
             IDiscordRestUserAPI    users,
             IDiscordRestChannelAPI channels,

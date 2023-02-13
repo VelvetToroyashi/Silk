@@ -42,8 +42,8 @@ public class MessageParser : AbstractTypeParser<IMessage>
 
         channel ??= _context switch
         {
-            MessageContext messageContext => messageContext.Message.ChannelID.IsDefined(out var chn) ? chn : null,
-            InteractionContext interactionContext => interactionContext.Interaction.ChannelID.IsDefined(out var chn) ? chn : null,
+            ITextCommandContext messageContext => messageContext.Message.ChannelID.IsDefined(out var chn) ? chn : null,
+            IInteractionCommandContext interactionContext => interactionContext.Interaction.ChannelID.IsDefined(out var chn) ? chn : null,
             _ => null
         };
         

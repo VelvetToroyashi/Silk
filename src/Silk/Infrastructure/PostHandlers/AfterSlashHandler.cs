@@ -20,7 +20,7 @@ public class AfterSlashHandler : IPostExecutionEvent
 
     public async Task<Result> AfterExecutionAsync(ICommandContext context, IResult commandResult, CancellationToken ct)
     {
-        if (context is not InteractionContext ic || commandResult.IsSuccess)
+        if (context is not IInteractionCommandContext ic || commandResult.IsSuccess)
             return Result.FromSuccess();
         
         /*

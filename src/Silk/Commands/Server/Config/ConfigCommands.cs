@@ -44,14 +44,14 @@ public partial class ConfigCommands : CommandGroup
     public partial class ViewConfigCommands : CommandGroup
     {
         private readonly IMediator              _mediator;
-        private readonly MessageContext         _context;
+        private readonly ITextCommandContext         _context;
         private readonly IDiscordRestGuildAPI   _guilds;
         private readonly IDiscordRestChannelAPI _channels;
 
         public ViewConfigCommands
         (
             IMediator              mediator,
-            MessageContext         context,
+            ITextCommandContext         context,
             IDiscordRestGuildAPI   guilds,
             IDiscordRestChannelAPI channels
         )

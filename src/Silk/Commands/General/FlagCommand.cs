@@ -19,10 +19,10 @@ namespace Silk.Commands.General;
 public class FlagCommand : CommandGroup
 {
     private readonly FlagOverlayService _flags;
-    private readonly MessageContext _context;
+    private readonly ITextCommandContext _context;
     private readonly IDiscordRestChannelAPI _channels;
     
-    public FlagCommand(FlagOverlayService flags, MessageContext context, IDiscordRestChannelAPI channels)
+    public FlagCommand(FlagOverlayService flags, ITextCommandContext context, IDiscordRestChannelAPI channels)
     {
         _flags         = flags;
         _context       = context;

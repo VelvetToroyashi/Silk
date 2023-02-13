@@ -35,7 +35,7 @@ namespace Silk.Commands.Bot;
 [Category(Categories.Bot)]
 public class EvalCommand : CommandGroup
 {
-    private readonly MessageContext _context;
+    private readonly ITextCommandContext _context;
     
     private readonly IDiscordRestUserAPI                _users;
     private readonly IDiscordRestGuildAPI               _guilds;
@@ -82,7 +82,8 @@ Microsoft.Extensions.Logging
         Title  = "Evaluating. Please wait.",
         Colour = Color.HotPink
     };
-    public EvalCommand(MessageContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events, IServiceProvider services)
+    
+    public EvalCommand(ITextCommandContext context, IDiscordRestChannelAPI channels, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestGuildScheduledEventAPI events, IServiceProvider services)
     {
         _context       = context;
         _channels      = channels;

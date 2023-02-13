@@ -53,21 +53,21 @@ public class PostCommandHandler : IPostExecutionEvent
         var user = context switch 
         {
             ITextCommandContext c => c.Message.Author.Value,
-            IInteractionContext c => c.Interaction.User.Value,
+            IInteractionCommandContext c => c.Interaction.User.Value,
             _ => throw new InvalidOperationException()
         };
         
         var guildID = context switch 
         {
             ITextCommandContext c => c.GuildID,
-            IInteractionContext c => c.Interaction.GuildID,
+            IInteractionCommandContext c => c.Interaction.GuildID,
             _ => throw new InvalidOperationException()
         };
         
         var channelID = context switch 
         {
             ITextCommandContext c => c.Message.ChannelID,
-            IInteractionContext c => c.Interaction.ChannelID,
+            IInteractionCommandContext c => c.Interaction.ChannelID,
             _ => throw new InvalidOperationException()
         };
         
@@ -102,7 +102,7 @@ public class PostCommandHandler : IPostExecutionEvent
                 _                         => message
             };
 
-            if (context is not InteractionContext ic)
+            if (context is not IInteractionCommandContext ic)
                 await _channels.CreateMessageAsync(channelID.Value, responseMessage, ct: ct);
             else
                 await _interactions.CreateFollowupMessageAsync(ic.Interaction.ApplicationID, ic.Interaction.Token, responseMessage, flags: MessageFlags.Ephemeral, ct: ct);

@@ -25,7 +25,7 @@ public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
     {
         var channelID = _context switch
         {
-            IInteractionContext interactionContext => interactionContext.Interaction.ChannelID.Value,
+            IInteractionCommandContext interactionContext => interactionContext.Interaction.ChannelID.Value,
             ITextCommandContext messageContext     => messageContext.Message.ChannelID.Value,
         };
         

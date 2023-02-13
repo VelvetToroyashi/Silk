@@ -24,7 +24,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
     public const string RoleMenuDropdownPrefix = "rm-menu-selector";
 
     private readonly RoleMenuRepository                   _repo;
-    private readonly InteractionContext                   _context;
+    private readonly IInteractionCommandContext _context;
     private readonly IDiscordRestUserAPI                  _users;
     private readonly IDiscordRestGuildAPI                 _guilds;
     private readonly IDiscordRestInteractionAPI           _interactions;
@@ -33,7 +33,7 @@ public class RoleMenuInteractionCommands : InteractionGroup
     public RoleMenuInteractionCommands
     (
         RoleMenuRepository                   repo,
-        InteractionContext                   context,
+        IInteractionCommandContext context,
         IDiscordRestUserAPI                  users,
         IDiscordRestGuildAPI                 guilds,
         IDiscordRestInteractionAPI           interactions,

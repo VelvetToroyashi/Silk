@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Contexts;
 using Remora.Discord.Gateway;
+using Remora.Rest;
 using Remora.Results;
 using Silk.Data;
 using Silk.Utilities;
@@ -21,28 +23,35 @@ namespace Silk.Commands.General;
 public class PingCommand : CommandGroup
 {
     private readonly IDbContextFactory<GuildContext> _db;
-    private readonly MessageContext                  _context;
+    private readonly ITextCommandContext             _context;
     private readonly DiscordGatewayClient            _gateway;
     private readonly IDiscordRestChannelAPI          _channels;
+    private readonly IRestHttpClient                 _client;
 
     public PingCommand
     (
         IDbContextFactory<GuildContext> db,
-        MessageContext                  context,
+        ITextCommandContext                  context,
         DiscordGatewayClient            gateway,
-        IDiscordRestChannelAPI          channels
+        IDiscordRestChannelAPI          channels,
+        IRestHttpClient client
     )
     {
         _db       = db;
         _context  = context;
         _gateway  = gateway;
         _channels = channels;
+        _client   = client;
     }
 
     [Command("ping")]
     [Description("Pong! This is the latency of Silk!; if something seems slow, it's probably because of high latency!")]
     public async Task<Result<IMessage>> Ping()
     {
+        var now = DateTimeOffset.UtcNow;
+        
+        var apiLat = (_context.GetMessageID().Timestamp - now).TotalMilliseconds.ToString("N0");
+        
         var embed = new Embed
         {
             Colour = Color.DodgerBlue,
@@ -54,7 +63,7 @@ public class PingCommand : CommandGroup
 
                 new("→ Database Latency ←", "```cs\n" + "Fetching..".PadLeft(15, '⠀') + "```", true),
                 new("​", "​", true),
-                new("→ Discord API Latency ←", "```cs\n" + "Fetching..".PadLeft(15, '⠀') + "```", true)
+                new("→ Command Latency ←", "```cs\n" + $"{apiLat} ms".PadLeft(11, '⠀') + "```", true)
             }
         };
 
@@ -62,18 +71,7 @@ public class PingCommand : CommandGroup
 
         if (!message.IsSuccess)
             return message;
-
-        var sw = Stopwatch.StartNew();
         
-        var typing = await _channels.TriggerTypingIndicatorAsync(_context.GetChannelID());
-        
-        sw.Stop();
-        
-        if (!typing.IsSuccess)
-            return Result<IMessage>.FromError(typing.Error);
-        
-        var apiLat = sw.ElapsedMilliseconds.ToString("N0");
-
         var messageLat = message.Entity.Timestamp - (_context.Message.EditedTimestamp.IsDefined(out var edit) ? edit.Value : _context.GetMessageID().Timestamp);
         
         embed = embed with
@@ -83,21 +81,21 @@ public class PingCommand : CommandGroup
                 (embed.Fields.Value[0] as EmbedField)! with { Value = "```cs\n" + $"{messageLat.TotalMilliseconds:N0} ms".PadLeft(10) + "```" },
                 (embed.Fields.Value[1] as EmbedField)!,
                 (embed.Fields.Value[2] as EmbedField)!,
-                (embed.Fields.Value[3] as EmbedField)! with { Value = "```cs\n" + $"{GetDbLatency()}".PadLeft(7) + " ms```" },
+                (embed.Fields.Value[3] as EmbedField)! with { Value = "```cs\n" + $"{GetDbLatency():F2}".PadLeft(7) + " ms```" },
                 (embed.Fields.Value[4] as EmbedField)!,
-                (embed.Fields.Value[5] as EmbedField)! with { Value = "```cs\n" + $"{apiLat} ms".PadLeft(11) + "```" },
+                (embed.Fields.Value[5] as EmbedField)!,
             }
         };
         
         return await _channels.EditMessageAsync(_context.GetChannelID(), message.Entity.ID, embeds: new[] { embed });
     }
 
-    private int GetDbLatency()
+    private double GetDbLatency()
     {
         using var db = _db.CreateDbContext();
         var       sw = Stopwatch.StartNew();
         db.Database.ExecuteSqlRaw("SELECT first_value(\"id\") OVER () FROM \"guilds\"");
         sw.Stop();
-        return (int)sw.ElapsedMilliseconds;
+        return sw.Elapsed.TotalMilliseconds;
     }
 }

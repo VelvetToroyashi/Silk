@@ -27,7 +27,7 @@ public partial class ConfigCommands
         public class GreetingCommands : CommandGroup
         {
             private readonly IMediator              _mediator;
-            private readonly MessageContext         _context;
+            private readonly ITextCommandContext         _context;
             private readonly IDiscordRestChannelAPI _channels;
 
             public enum GreetOption
@@ -41,7 +41,7 @@ public partial class ConfigCommands
             public GreetingCommands
             (
                 IMediator              mediator,
-                MessageContext         context,
+                ITextCommandContext         context,
                 IDiscordRestChannelAPI channels
             )
             {

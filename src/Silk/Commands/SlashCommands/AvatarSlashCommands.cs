@@ -18,11 +18,11 @@ namespace Silk.Commands.SlashCommands;
 [SlashCommand]
 public class AvatarSlashCommands : CommandGroup
 {
-    private readonly InteractionContext         _context;
+    private readonly IInteractionCommandContext _context;
     private readonly IDiscordRestGuildAPI       _guilds;
     private readonly IDiscordRestInteractionAPI _interactions;
 
-    public AvatarSlashCommands(InteractionContext context, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions)
+    public AvatarSlashCommands(IInteractionCommandContext context, IDiscordRestGuildAPI guilds, IDiscordRestInteractionAPI interactions)
     {
         _context  = context;
         _guilds   = guilds;

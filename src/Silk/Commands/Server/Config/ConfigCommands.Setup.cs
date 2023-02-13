@@ -57,12 +57,12 @@ public partial class ConfigCommands
         private static readonly DiscordPermissionSet _modlogPermissions = new(DiscordPermission.ViewChannel, DiscordPermission.ReadMessageHistory);
 
         private readonly IMediator              _mediator;
-        private readonly MessageContext         _context;
+        private readonly ITextCommandContext         _context;
         private readonly IDiscordRestUserAPI    _users;
         private readonly IDiscordRestGuildAPI   _guilds;
         private readonly IDiscordRestChannelAPI _channels;
         
-        public Setup(IMediator mediator, MessageContext context, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestChannelAPI channels)
+        public Setup(IMediator mediator, ITextCommandContext context, IDiscordRestUserAPI users, IDiscordRestGuildAPI guilds, IDiscordRestChannelAPI channels)
         {
             _mediator = mediator;
             _context  = context;

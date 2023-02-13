@@ -31,7 +31,7 @@ public class RequireTeamOrOwnerCondition : ICondition<RequireTeamOrOwnerAttribut
 
         var user = _context switch
         {
-            IInteractionContext interaction => interaction.Interaction.User.Value,
+            IInteractionCommandContext interaction => interaction.Interaction.User.Value,
             ITextCommandContext command     => command.Message.Author.Value,
         };
         

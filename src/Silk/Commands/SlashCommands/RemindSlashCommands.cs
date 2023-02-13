@@ -26,10 +26,10 @@ namespace Silk.Commands.SlashCommands;
 [SlashCommand]
 public class RemindContextCommands : CommandGroup
 {
-    private readonly InteractionContext         _context;
+    private readonly IInteractionCommandContext _context;
     private readonly IDiscordRestInteractionAPI _interactions;
     
-    public RemindContextCommands(InteractionContext context, IDiscordRestInteractionAPI interactions)
+    public RemindContextCommands(IInteractionCommandContext context, IDiscordRestInteractionAPI interactions)
     {
         _context      = context;
         _interactions = interactions;
@@ -75,14 +75,14 @@ public class RemindSlashCommands : CommandGroup
 
     private readonly TimeHelper                 _timeHelper;
     private readonly ReminderService            _reminders;
-    private readonly InteractionContext         _context;
+    private readonly IInteractionCommandContext _context;
     private readonly IDiscordRestInteractionAPI _interactions;
     
     public RemindSlashCommands
     (
         TimeHelper                 timeHelper,
         ReminderService            reminders,
-        InteractionContext         context,
+        IInteractionCommandContext context,
         IDiscordRestInteractionAPI interactions
     )
     {

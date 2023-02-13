@@ -40,7 +40,7 @@ namespace RoleMenuPlugin;
 public sealed class RoleMenuCommand : CommandGroup
 {
     private readonly RoleMenuRepository       _repo;
-    private readonly MessageContext           _context;
+    private readonly ITextCommandContext           _context;
     private readonly IDiscordRestUserAPI      _users;
     private readonly IDiscordRestGuildAPI     _guilds;
     private readonly IDiscordRestChannelAPI   _channels;
@@ -48,7 +48,7 @@ public sealed class RoleMenuCommand : CommandGroup
     
     public RoleMenuCommand
     (
-        MessageContext           context,
+        ITextCommandContext           context,
         RoleMenuRepository       repo,
         IDiscordRestUserAPI      users,
         IDiscordRestGuildAPI     guilds,
@@ -207,10 +207,10 @@ public sealed class RoleMenuCommand : CommandGroup
     public class EditGroup : CommandGroup
     {
         private readonly RoleMenuRepository     _repo;
-        private readonly MessageContext         _context;
+        private readonly ITextCommandContext         _context;
         private readonly IDiscordRestChannelAPI _channels;
         
-        public EditGroup(RoleMenuRepository repo, MessageContext context, IDiscordRestChannelAPI channels)
+        public EditGroup(RoleMenuRepository repo, ITextCommandContext context, IDiscordRestChannelAPI channels)
         {
             _repo     = repo;
             _context  = context;
@@ -402,7 +402,7 @@ public sealed class RoleMenuCommand : CommandGroup
 
     }
 
-    private static async Task<IResult> DeleteAfter(MessageContext context, IDiscordRestChannelAPI api,  string content, TimeSpan delay)
+    private static async Task<IResult> DeleteAfter(ITextCommandContext context, IDiscordRestChannelAPI api,  string content, TimeSpan delay)
     {
         var sendResult = await api.CreateMessageAsync(context.Message.ChannelID.Value, content);
 

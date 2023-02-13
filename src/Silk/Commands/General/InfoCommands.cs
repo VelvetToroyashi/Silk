@@ -35,7 +35,7 @@ namespace Silk.Commands.General;
 public class InfoCommands : CommandGroup
 {
     private readonly ICacheProvider         _cache;
-    private readonly MessageContext         _context;
+    private readonly ITextCommandContext         _context;
     private readonly IDiscordRestUserAPI    _users;
     private readonly IDiscordRestEmojiAPI   _emojis;
     private readonly IDiscordRestGuildAPI   _guilds;
@@ -44,7 +44,7 @@ public class InfoCommands : CommandGroup
     public InfoCommands
     (
         ICacheProvider         cache,
-        MessageContext         context,
+        ITextCommandContext         context,
         IDiscordRestUserAPI    users,
         IDiscordRestEmojiAPI   emojis,
         IDiscordRestGuildAPI   guilds,
