@@ -14,7 +14,7 @@ public class NonSelfActionableCondition :
     ICondition<NonSelfActionableAttribute, IUser>,
     ICondition<NonSelfActionableAttribute, IGuildMember>
 {
-    private readonly ICommandContext     _context;
+    private readonly IOperationContext _context;
     private readonly IDiscordRestUserAPI _users;
     
     public NonSelfActionableCondition(ICommandContext context, IDiscordRestUserAPI users)
@@ -28,7 +28,7 @@ public class NonSelfActionableCondition :
         var contextUser = _context switch
         {
             IInteractionContext interactionContext => interactionContext.Interaction.User.Value,
-            ITextCommandContext textCommandContext => textCommandContext.Message.Author.Value,
+            IMessageContext textCommandContext     => textCommandContext.Message.Author.Value,
             _                                      => throw new InvalidOperationException()
         };
         
