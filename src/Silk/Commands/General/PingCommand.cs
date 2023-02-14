@@ -17,6 +17,7 @@ using Silk.Data;
 using Silk.Utilities;
 using Silk.Utilities.HelpFormatter;
 
+
 namespace Silk.Commands.General;
 
 [Category(Categories.Misc)]
@@ -50,7 +51,7 @@ public class PingCommand : CommandGroup
     {
         var now = DateTimeOffset.UtcNow;
         
-        var apiLat = (_context.GetMessageID().Timestamp - now).TotalMilliseconds.ToString("N0");
+        var apiLat = (now - (_context.Message.EditedTimestamp.IsDefined(out var ts) ? ts.Value : _context.GetMessageID().Timestamp)).TotalMilliseconds.ToString("N0");
         
         var embed = new Embed
         {
