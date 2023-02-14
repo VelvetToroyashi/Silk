@@ -50,9 +50,8 @@ public class PingCommand : CommandGroup
     public async Task<Result<IMessage>> Ping()
     {
         var now = DateTimeOffset.UtcNow;
-        
         var apiLat = (now - (_context.Message.EditedTimestamp.IsDefined(out var ts) ? ts.Value : _context.GetMessageID().Timestamp)).TotalMilliseconds.ToString("N0");
-        
+
         var embed = new Embed
         {
             Colour = Color.DodgerBlue,

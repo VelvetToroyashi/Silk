@@ -13,9 +13,10 @@ namespace Silk.Commands.Conditions;
 /// </summary>
 public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
 {
-    private readonly ICommandContext        _context;
+    private readonly IOperationContext _context;
     private readonly IDiscordRestChannelAPI _channelApi;
-    public RequireNSFWCondition(ICommandContext context, IDiscordRestChannelAPI channelApi)
+    
+    public RequireNSFWCondition(IOperationContext context, IDiscordRestChannelAPI channelApi)
     {
         _context    = context;
         _channelApi = channelApi;
@@ -25,8 +26,8 @@ public class RequireNSFWCondition : ICondition<NSFWChannelAttribute>
     {
         var channelID = _context switch
         {
-            IInteractionCommandContext interactionContext => interactionContext.Interaction.ChannelID.Value,
-            ITextCommandContext messageContext     => messageContext.Message.ChannelID.Value,
+            IInteractionContext interactionContext => interactionContext.Interaction.ChannelID.Value,
+            IMessageContext messageContext         => messageContext.Message.ChannelID.Value,
         };
         
         Result<IChannel> channelRes = await _channelApi.GetChannelAsync(channelID, ct);
