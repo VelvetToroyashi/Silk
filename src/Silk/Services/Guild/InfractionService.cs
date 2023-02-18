@@ -54,6 +54,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
     private readonly ILogger<InfractionService> _logger;
 
     private readonly List<Infraction> _queue = new();
+    
     public InfractionService
     (
         IMediator                  mediator,
