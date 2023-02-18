@@ -41,6 +41,7 @@ namespace Silk.Commands.Moderation
         [Command("ban", "403", "301")]
         [RequireContext(ChannelContext.Guild)]
         [RequireDiscordPermission(DiscordPermission.BanMembers)]
+        [RequireBotDiscordPermissions(DiscordPermission.BanMembers)]
         [Description("Permanently or temporarily ban someone from the server!")]
         [SuppressMessage("ReSharper", "RedundantBlankLines", Justification = "Readability")]
         public async Task<Result<IMessage>> BanAsync

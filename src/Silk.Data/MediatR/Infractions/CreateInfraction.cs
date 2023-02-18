@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Mediator;
@@ -57,7 +58,7 @@ public static class CreateInfraction
             await db.SaveChangesAsync(cancellationToken);
             
             // We have to re-request in order to get the ID.
-            infraction = await db.Infractions.LastAsync(inf => inf.TargetID == request.TargetID && inf.Type == request.Type && inf.GuildID == request.GuildID, cancellationToken); 
+            infraction = await db.Infractions.OrderByDescending(inf => inf.CreatedAt).FirstAsync(inf => inf.TargetID == request.TargetID && inf.Type == request.Type && inf.GuildID == request.GuildID, cancellationToken); 
             
             return InfractionEntity.ToDTO(infraction);
         }

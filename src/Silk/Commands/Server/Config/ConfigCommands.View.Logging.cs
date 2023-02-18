@@ -28,6 +28,8 @@ public partial class ConfigCommands
             
             var logMemberJoins = logging.LogMemberJoins ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
             var logMemberLeaves = logging.LogMemberLeaves ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
+            
+            var logInfractions = logging.LogInfractions ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
 
             var editLogChannel = logging.MessageEdits?.ChannelID is null
                     ?  "**Not Configured**"
@@ -44,6 +46,10 @@ public partial class ConfigCommands
             var leaveLogChannel = logging.MemberLeaves?.ChannelID is null
                 ?  "**Not Configured**"
                 : $"<#{logging.MemberLeaves.ChannelID}>";
+            
+            var infractionLogChannel = logging.Infractions?.ChannelID is null
+                ?  "**Not Configured**"
+                : $"<#{logging.Infractions.ChannelID}>";
 
             var useMobileFriendlyLogging = logging.UseMobileFriendlyLogging ? Emojis.EnabledEmoji : Emojis.DisabledEmoji;
             
@@ -59,7 +65,9 @@ public partial class ConfigCommands
                               $"{logMemberJoins} Log Member Joins\n"                  +
                               $"> Log Channel: {joinLogChannel}\n\n"        +
                               $"{logMemberLeaves} Log Member Leaves\n"                +
-                              $"> Log Channel: {leaveLogChannel}",
+                              $"> Log Channel: {leaveLogChannel}\n\n" +
+                              $"{logInfractions} Log Infractions\n" +
+                              $"> Log Channel: {infractionLogChannel}"  ,
                 Colour = Color.Goldenrod
             };
 

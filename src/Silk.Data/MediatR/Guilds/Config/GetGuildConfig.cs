@@ -50,7 +50,8 @@ public static class GetGuildConfig
 
             var query = request.AsTracking ? initialQueryable.AsTracking() : initialQueryable.AsNoTracking();
             
-            return await query.FirstAsync(g => g.GuildID == request.GuildId, cancellationToken);
+           var ret = await query.FirstAsync(g => g.GuildID == request.GuildId, cancellationToken);
+           return ret;
         }
     }
 }
