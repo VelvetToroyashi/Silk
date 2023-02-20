@@ -23,6 +23,7 @@ public class MuteCommand : CommandGroup
     private readonly ICommandContext        _context;
     private readonly IDiscordRestChannelAPI _channels;
     private readonly IInfractionService     _infractions;
+    
     public MuteCommand(ICommandContext context, IDiscordRestChannelAPI channels, IInfractionService infractions)
     {
         _context     = context;

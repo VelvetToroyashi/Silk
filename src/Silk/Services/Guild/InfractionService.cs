@@ -27,7 +27,6 @@ using Silk.Data.MediatR.Infractions;
 using Silk.Errors;
 using Silk.Extensions;
 using Silk.Extensions.Remora;
-using Silk.Services.Data;
 using Silk.Services.Interfaces;
 using Silk.Shared.Constants;
 using Silk.Shared.Types;
@@ -352,14 +351,16 @@ public sealed class InfractionService : IHostedService, IInfractionService
     /// <inheritdoc />
     public async ValueTask<bool> IsMutedAsync(Snowflake guildID, Snowflake targetID)
     {
-        bool Predicate(Infraction inf) 
-            => inf.Type is InfractionType.Mute 
-                        or InfractionType.AutoModMute && 
-               inf.GuildID == guildID && 
-               inf.TargetID == targetID &&
-               !inf.Processed;
+        bool Predicate(Infraction inf)
+            => inf is
+               {
+                   Type: InfractionType.Mute or InfractionType.AutoModMute,
+                   Processed: false
+               }                       &&
+               inf.GuildID  == guildID &&
+               inf.TargetID == targetID;
 
-        var inMemory = _queue.Any(Predicate);
+            var inMemory = _queue.Any(Predicate);
 
         if (inMemory)
             return true;
@@ -392,7 +393,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
         if (await IsMutedAsync(guildID, targetID))
         {
             var userInfractions = await _mediator.Send(new GetUserInfractionsForGuild.Request(guildID, targetID));
-            var muteInfraction  = userInfractions.Last(inf => inf.Type is InfractionType.AutoModMute or InfractionType.Mute && !inf.Pardoned && !inf.Processed);
+            var muteInfraction  = userInfractions.Last(inf => inf is { Type: InfractionType.Mute or InfractionType.AutoModMute, Pardoned: false, Processed: false });
             
             return await UpdateInfractionAsync(muteInfraction, enforcer, reason, expirationRelativeToNow);
         }
@@ -594,23 +595,25 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var selfResult = await _guilds.GetCurrentGuildMemberAsync(_users, guildID);
         
         if (!selfResult.IsSuccess)
-            return Result.FromError(selfResult.Error);
+            return (Result)selfResult;
         
         var guildRolesResult = await _guilds.GetGuildRolesAsync(guildID);
         
         if (!guildRolesResult.IsSuccess)
-            return Result.FromError(guildRolesResult.Error);
+            return (Result)guildRolesResult;
 
         var everyoneRole = guildRolesResult.Entity.Single(role => role.ID == guildID);
         
         var botRoles = guildRolesResult.Entity.Where(r => selfResult.Entity.Roles.Contains(r.ID)).ToArray();
         
-        var roleResult = await _guilds.CreateGuildRoleAsync(
-                                                            guildID, 
-                                                            "Muted",
-                                                            DiscordPermissionSet.Empty,
-                                                            isMentionable: false,
-                                                            reason: "Mute role created by AutoMod.");
+        var roleResult = await _guilds.CreateGuildRoleAsync
+        (
+         guildID,
+         "Muted",
+         DiscordPermissionSet.Empty,
+           isMentionable: false,
+           reason: "Auto-generated mute role."
+        );
         
         if (!roleResult.IsSuccess)
             return Result.FromError(new PermissionError("Unable to create mute role."));
@@ -625,12 +628,11 @@ public sealed class InfractionService : IHostedService, IInfractionService
         var channels = await _guilds.GetGuildChannelsAsync(guildID);
         
         if (!channels.IsSuccess)
-            return Result.FromError(channels.Error);
+            return (Result)channels;
 
         foreach (var channel in channels.Entity.Where(c => c.Type is ChannelType.GuildText))
         {
-            if (!channel.PermissionOverwrites.IsDefined(out var overwrites))
-                overwrites = new List<IPermissionOverwrite>();
+            var overwrites = channel.PermissionOverwrites.OrDefault(new List<IPermissionOverwrite>());
             
             var permissions         = DiscordPermissionSet.ComputePermissions(roleResult.Entity.ID, everyoneRole, overwrites);
             var selfPermissions     = DiscordPermissionSet.ComputePermissions(selfResult.Entity.User.Value.ID, everyoneRole, botRoles, overwrites);
@@ -643,12 +645,12 @@ public sealed class InfractionService : IHostedService, IInfractionService
                 everyonePermissions.HasPermission(DiscordPermission.ViewChannel))
             {
                 var overwriteResult = await _channels.EditChannelPermissionsAsync
-                    (
-                     channel.ID,
-                     roleResult.Entity.ID,
-                     new DiscordPermissionSet(DiscordPermission.ViewChannel),
-                     new DiscordPermissionSet(DiscordPermission.SendMessages, DiscordPermission.AddReactions)
-                    );
+                (
+                 channel.ID,
+                 roleResult.Entity.ID,
+                 new DiscordPermissionSet(DiscordPermission.ViewChannel),
+                 new DiscordPermissionSet(DiscordPermission.SendMessages, DiscordPermission.AddReactions)
+                );
 
                 if (!overwriteResult.IsSuccess && !overwrites.Any())
                     _logger.LogError("Failed to set permissions in {Channel} on {Guild}, but permissions should allow for it.", channel.ID, guildID);
