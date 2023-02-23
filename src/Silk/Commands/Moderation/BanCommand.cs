@@ -60,11 +60,15 @@ namespace Silk.Commands.Moderation
             
             [Greedy]
             [Description("The reason for the ban.")]
-            string reason = "Not Given."
+            string reason = "Not Given.",
+        
+            [Switch('s', "silent")]
+            [Description("Whether to send a message to the user.")]
+            bool silent = false
         )
         {
-            var infractionResult = await _infractions.BanAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), days, reason, banDuration);
-            var notified         = infractionResult.Entity.Notified ? "(User notified with DM)" : "(Failed to DM)";
+            var infractionResult = await _infractions.BanAsync(_context.GetGuildID(), user.ID, _context.GetUserID(), days, reason, banDuration, notify: !silent);
+            var notified         = silent ? "(Skipped notification)" : infractionResult.Entity.Notified ? "(User notified with DM)" : "(Failed to DM)";
             
             return await _channels.CreateMessageAsync
                 (

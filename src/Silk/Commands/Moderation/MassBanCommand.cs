@@ -16,7 +16,7 @@ using Silk.Utilities.HelpFormatter;
 namespace Silk.Commands.Moderation;
 
 [Category(Categories.Mod)]
-public class MassBanCommand : CommandGroup
+public class @MassBanCommand : CommandGroup
 {
     private readonly ICommandContext        _context;
     private readonly IInfractionService     _infractions;
@@ -46,14 +46,18 @@ public class MassBanCommand : CommandGroup
         [Greedy]
         [Option('r', "reason")]
         [Description("Why the users are being banned.")]
-        string reason = "Not given."
+        string reason = "Not given.",
+    
+        [Switch('s', "silent")]
+        [Description("Whether to send a message to the user about the ban.")]
+        bool silent = false
     )
     {
         users = users.DistinctBy(u => u.ID).ToArray();
 
         days = Math.Min((byte)7, days);
         
-        var result = await Task.WhenAll(users.Select((u, i) => _infractions.BanAsync(_context.GetGuildID(), u.ID, _context.GetUserID(), days, reason, notify: i < 15)));
+        var result = await Task.WhenAll(users.Select((u, i) => _infractions.BanAsync(_context.GetGuildID(), u.ID, _context.GetUserID(), days, reason, notify: !silent && i < 15)));
 
         var failed = result.Count(r => !r.IsSuccess);
 
