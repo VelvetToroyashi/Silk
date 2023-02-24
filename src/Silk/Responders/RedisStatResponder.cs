@@ -42,7 +42,7 @@ public class RedisStatResponder : IResponder<IReady>, IResponder<IGuildCreate>, 
     public async Task<Result> RespondAsync(IGuildCreate gatewayEvent, CancellationToken ct = default)
     {
         var unavailable = false;
-        var present = gatewayEvent.Guild.IsT1 && gatewayEvent.Guild.AsT1.IsUnavailable.IsDefined(out unavailable);
+        var present = gatewayEvent.Guild.IsT0 || gatewayEvent.Guild.AsT1.IsUnavailable.IsDefined(out unavailable);
 
         if (unavailable)
             return Result.FromSuccess();
