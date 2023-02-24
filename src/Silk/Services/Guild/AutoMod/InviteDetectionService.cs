@@ -30,6 +30,7 @@ public class InviteDetectionService
    private readonly IDiscordRestChannelAPI          _channels;
    private readonly ExemptionEvaluationService      _exemptions;
    private readonly ILogger<InviteDetectionService> _logger;
+   
    public InviteDetectionService
    (
       IMediator                       mediator,
