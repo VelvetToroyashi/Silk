@@ -39,7 +39,6 @@ public sealed class TimeHelper
         if (MicroTimeParser.TryParse(input.Split(' ')[0]).IsDefined(out var basicTime))
             return Result<TimeSpan>.FromSuccess(basicTime);
         
-        var currentYear = DateTime.UtcNow.Year;
         var refTime     = DateTime.UtcNow + (offset?.ToTimeSpan() ?? TimeSpan.Zero);
         var parsedTimes = DateTimeV2Recognizer.RecognizeDateTimes(input, CultureInfo.InvariantCulture.DisplayName, refTime);
 
@@ -51,11 +50,11 @@ public sealed class TimeHelper
                        .Values
                        .Where(v => v is DateTimeV2Date or DateTimeV2DateTime)
                        .FirstOrDefault
-                       (
-                         v => v is DateTimeV2Date dtd
-                             ? dtd.Value.Year                        >= currentYear
-                             : (v as DateTimeV2DateTime)!.Value.Year >= currentYear
-                       );
+                        (
+                         v => v is DateTimeV2Date dtd 
+                         ? dtd.Value > refTime 
+                         : (v as DateTimeV2DateTime)!.Value > refTime
+                        );
 
         if (timeModel is null)
             return Result<TimeSpan>.FromError(new NotFoundError(ReminderTimeNotPresent));
