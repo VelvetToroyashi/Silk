@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${ARCH} AS build
 WORKDIR /Silk
 COPY . ./
 
-RUN sh ./restore.sh && dotnet publish ./src/Silk/Silk.csproj -c Release -o out
+RUN sh ./restore.sh && dotnet publish ./src/Silk/Silk.csproj -c Release -o out --no-restore
 
 # Run it
 ARG ARCH=amd64
