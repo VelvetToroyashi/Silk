@@ -1,17 +1,15 @@
 # Build it
 ARG ARCH=amd64
-ENV ARCH=${ARCH}
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-{ARCH} AS build
+ENV BUILD_ARCH=${ARCH}
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${ARCH} AS build
 
 WORKDIR /Silk
 COPY . ./
 RUN dotnet restore 
 
-RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out -r $ARCH
+RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out -r BUILD_ARCH
 
 # Run it
-ARG ARCH=amd64
-ENV ARCH=${ARCH}
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-${ARCH}
 
 # Install cultures (same approach as Alpine SDK image)
