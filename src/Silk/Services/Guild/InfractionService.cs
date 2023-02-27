@@ -260,6 +260,7 @@ public sealed class InfractionService : IHostedService, IInfractionService
                     infraction = await _mediator.Send(new UpdateInfraction.Request(infraction.CaseID, infraction.GuildID, Notified: true));
             }
         }
+        
         Result kickResult = await _guilds.RemoveGuildMemberAsync(guildID, targetID, reason);
 
         if (!kickResult.IsSuccess)

@@ -11,6 +11,7 @@
         <TieredPGO>true</TieredPGO>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <UserSecretsId>VelvetThePanda-Silk</UserSecretsId>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
