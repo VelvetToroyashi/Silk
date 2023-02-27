@@ -1,14 +1,16 @@
 # Build it
+ARG ARCH=amd64
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
 WORKDIR /Silk
 COPY . ./
 RUN dotnet restore 
 
-RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out 
+RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out -r ${ARCH}
 
 # Run it
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
+ARG ARCH=amd64
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-${ARCH}
 
 # Install cultures (same approach as Alpine SDK image)
 RUN apk add --no-cache icu-libs
