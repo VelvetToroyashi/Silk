@@ -2,7 +2,7 @@
 ARG ARCH=amd64
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17 AS build
 
-RUN bash -c if [ "$ARCH" = "arm64" ]; export DOTNET_BUILD_ARCH=linux-arm64; else export DOTNET_BUILD_ARCH=linux-x64; fi
+RUN bash -c if [ "$ARCH" = "arm64" ]; then export DOTNET_BUILD_ARCH=linux-arm64; else export DOTNET_BUILD_ARCH=linux-x64; fi
 
 WORKDIR /Silk
 COPY . ./
