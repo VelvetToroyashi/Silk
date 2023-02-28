@@ -1,5 +1,5 @@
 # Build it
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-$TARGETARCH AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17 AS build
 
 WORKDIR /Silk
 COPY . ./
@@ -24,7 +24,6 @@ RUN apk upgrade --update-cache --available && \
 
 WORKDIR /Silk
 COPY --from=build /Silk/out .
-
 
 RUN chmod +x ./Silk
 
