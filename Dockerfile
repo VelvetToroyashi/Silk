@@ -9,7 +9,7 @@ WORKDIR /Silk
 COPY . ./
 
 # Really a restore script, oops
-RUN chmod +x restore.sh && restore.sh 
+RUN chmod +x ./restore.sh && ./restore.sh 
 
 RUN if [ "$TARGETARCH" = "arm64" ]; then \
     dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out; \
