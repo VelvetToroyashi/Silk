@@ -1,6 +1,6 @@
 # Build it
 ARG TARGETARCH=amd64
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${TARGETARCH} AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
 ARG TARGETARCH
@@ -18,8 +18,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
     fi
 
 # Run it
-ARG TARGETARCH=amd64
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-${TARGETARCH}
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
 
 # Install cultures (same approach as Alpine SDK image)
 RUN apk add --no-cache icu-libs

@@ -25,4 +25,4 @@ jobs:
         run: |
           docker buildx build --push \
           --tag velvetthepanda/silk:$BUILD_NUM \
-          --platform linux/amd64,linux/arm64/v8 .
+          --platform linux/amd64,linux/arm64 .
