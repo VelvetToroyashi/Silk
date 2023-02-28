@@ -8,12 +8,12 @@ done
 
 if [ "$TARGETARCH" = "arm64" ]; then 
 { 
-  echo "Compiling for ARM";
-  dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out &1> /dev/null; 
-}
+  echo "Compiling for ARM"; 
+  dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out; 
+} 
 else 
 { 
   echo "Compiling for $TARGETARCH"; 
-  dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-x64 -o out &1> /dev/null; 
-} 
+  dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-x64 -o out; 
+}  
 fi
