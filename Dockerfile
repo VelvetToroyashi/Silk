@@ -6,7 +6,7 @@ COPY . ./
 
 RUN dotnet restore ./src/Silk/Silk.csproj
 
-RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
+RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out --self-contained -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
 
 # Run it
 FROM --platform=$TARGETARCH mcr.microsoft.com/dotnet/aspnet:7.0-alpine
@@ -27,4 +27,4 @@ COPY --from=build /Silk/out .
 
 RUN chmod +x ./Silk
 
-CMD ["dotnet", "./Silk.dll"]
+CMD ["./Silk"]
