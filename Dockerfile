@@ -4,8 +4,6 @@ FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 WORKDIR /Silk
 COPY . ./
 
-RUN chmod +x ./restore.sh && ./restore.sh 
-
 RUN dotnet restore ./src/Silk.csproj && dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
 
 # Run it
