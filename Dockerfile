@@ -2,12 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${TARGETARCH} AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
-#ARG TARGETARCH
+ARG TARGETARCH
 
 WORKDIR /Silk
 COPY . ./
 
-RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out --no-restore -r linux-musl-$TARGETARCH
+RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out --no-restore -r $(echo "linux-musl-${TARGETARCH})
 
 # Run it
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-${TARGETARCH}
