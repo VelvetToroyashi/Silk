@@ -1,5 +1,5 @@
 # Build it
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
 ARG TARGETARCH=amd64
@@ -11,7 +11,7 @@ COPY . ./
 RUN chmod +x ./restore.sh && ./restore.sh 
 
 # Run it
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
+FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
 
 # Install cultures (same approach as Alpine SDK image)
 RUN apk add --no-cache icu-libs
@@ -26,6 +26,7 @@ RUN apk upgrade --update-cache --available && \
 
 WORKDIR /Silk
 COPY --from=build /Silk/out .
+
 
 RUN chmod +x ./Silk
 
