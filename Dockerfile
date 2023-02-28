@@ -1,4 +1,5 @@
 # Build it
+ARG TARGETARCH=amd64
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${TARGETARCH} AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
@@ -7,9 +8,17 @@ ARG TARGETARCH
 WORKDIR /Silk
 COPY . ./
 
-RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out --no-restore -r $(echo "linux-musl-${TARGETARCH})
+# Really a restore script, oops
+RUN ./build.sh 
+
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+    dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out; \
+    else \
+    dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-x64 -o out; \
+    fi
 
 # Run it
+ARG TARGETARCH=amd64
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-${TARGETARCH}
 
 # Install cultures (same approach as Alpine SDK image)
