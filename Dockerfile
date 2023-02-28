@@ -10,18 +10,6 @@ COPY . ./
 # Really a restore script, oops
 RUN chmod +x ./restore.sh && ./restore.sh 
 
-RUN if [ "$TARGETARCH" = "arm64" ]; then \
-    { \
-      echo "Compiling for ARM";
-      dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out &1> /dev/null; \
-    }\
-    else \
-    { \
-      echo "Compiling for $TARGETARCH"; \
-      dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-x64 -o out &1> /dev/null; \
-    } \
-    fi
-
 # Run it
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
 
