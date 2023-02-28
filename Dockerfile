@@ -9,7 +9,7 @@ RUN dotnet restore ./src/Silk/Silk.csproj
 RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
 
 # Run it
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-$TARGETARCH
+FROM --platform=$TARGETARCH mcr.microsoft.com/dotnet/aspnet:7.0
 
 # Install cultures (same approach as Alpine SDK image)
 RUN apk add --no-cache icu-libs
