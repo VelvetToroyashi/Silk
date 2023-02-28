@@ -1,5 +1,4 @@
 # Build it
-ARG TARGETARCH
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${TARGETARCH} AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
@@ -11,7 +10,6 @@ COPY . ./
 RUN dotnet publish ./src/Silk/Silk.csproj -c Release -o out --no-restore -r linux-musl-TARGETARCH
 
 # Run it
-ARG TARGETARCH
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-${TARGETARCH}
 
 # Install cultures (same approach as Alpine SDK image)
