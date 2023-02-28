@@ -11,9 +11,11 @@ COPY . ./
 RUN chmod +x ./restore.sh && ./restore.sh 
 
 RUN if [ "$TARGETARCH" = "arm64" ]; then \
-    dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out; \
+    echo "Compiling for ARM"
+    dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-arm64 -o out &1> /dev/null; \
     else \
-    dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-x64 -o out; \
+    echo "Compiling for $TARGETARCH"; \
+    dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-x64 -o out &1> /dev/null; \
     fi
 
 # Run it
