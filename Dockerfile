@@ -1,10 +1,10 @@
 # Build it
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
 WORKDIR /Silk
 COPY . ./
 
-RUN dotnet restore
+RUN dotnet restore ./src/Silk/Silk.csproj
 
 RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
 
