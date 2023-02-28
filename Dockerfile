@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${TARGETARCH} AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
-ARG TARGETARCH
+#ARG TARGETARCH
 
 WORKDIR /Silk
 COPY . ./
