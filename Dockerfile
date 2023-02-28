@@ -1,5 +1,5 @@
 # Build it
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine-$TARGETARCH AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-$TARGETARCH AS build
 
 WORKDIR /Silk
 COPY . ./
@@ -9,7 +9,7 @@ RUN dotnet restore ./src/Silk/Silk.csproj
 RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
 
 # Run it
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine-$TARGETARCH
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine3.17-$TARGETARCH
 
 # Install cultures (same approach as Alpine SDK image)
 RUN apk add --no-cache icu-libs
