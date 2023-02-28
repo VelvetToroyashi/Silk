@@ -6,7 +6,7 @@ COPY . ./
 
 RUN chmod +x ./restore.sh && ./restore.sh 
 
-RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
+RUN dotnet restore ./src/Silk.csproj && dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
 
 # Run it
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
