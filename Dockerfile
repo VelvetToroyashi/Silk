@@ -1,5 +1,5 @@
 # Build it
-FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
 # https://github.com/moby/moby/issues/34129 for explaination of this
 ARG TARGETARCH=amd64
