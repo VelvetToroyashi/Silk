@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${ARCH} AS build
 WORKDIR /Silk
 COPY . ./
 
-RUN ./build.sh
+CMD ["./build.sh", "--musl"]
 
 # Run it
 ARG ARCH=amd64
