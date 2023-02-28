@@ -8,4 +8,4 @@ done
 
 echo "Compiling for $TARGET_ARCH. This may take a while."
 
-dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -r linux-musl-$TARGET_ARCH -o out 1> /dev/null
+dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out 1> /dev/null

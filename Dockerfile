@@ -4,9 +4,7 @@ FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 # https://github.com/moby/moby/issues/34129 for explaination of this
 ARG TARGETARCH=amd64
 ARG amd64=x64
-ARG arm64=arm64
-RUN export TARGET_ARCH=$(printf '%s\n' "${!TARGETARCH}")
-
+ENV arm64=arm64
 WORKDIR /Silk
 COPY . ./
 
