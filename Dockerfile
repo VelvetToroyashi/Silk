@@ -2,13 +2,10 @@
 ARG ARCH=amd64
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine3.17-${ARCH} AS build
 
-# RUN bash to set $BUILD_ARCH to x64 for amd64, and arm64 for arm64
-RUN /bin/bash -c 'if [ "$ARCH" = "amd64" ]; then export BUILD_ARCH=x64; else export BUILD_ARCH=arm64; fi' 
-
 WORKDIR /Silk
 COPY . ./
 
-RUN sh ./restore.sh && dotnet publish ./src/Silk/Silk.csproj -c Release -o out --no-restore -r linux-$BUILD_ARCH
+RUN ./build.sh
 
 # Run it
 ARG ARCH=amd64

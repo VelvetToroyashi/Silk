@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <Platforms>AnyCPU;x64</Platforms>
+        <Platforms>x64;ARM64</Platforms>
+        <RuntimeIdentifiers>linux-x64;linux-arm64;linux-musl-arm64</RuntimeIdentifiers>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -20,7 +21,7 @@
         <DebugType>full</DebugType>
         <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
-
+    
     <ItemGroup>
         <None Remove="logs\**" />
         <None Include="flags\*.png" CopyToOutputDirectory="Always" />
