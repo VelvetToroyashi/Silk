@@ -23,11 +23,11 @@ jobs:
         run: |
           docker buildx build \
           --tag velvetthepanda/silk:$BUILD_NUM \
-          --platform linux/amd64,linux/arm64 .
+          --platform linux/amd64,linux/arm64v8 .
       - name: login to docker hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: push the image
         run: |
           docker buildx build --push \
             --tag velvetthepanda/silk:$BUILD_NUM \
-            --platform linux/amd64,linux/arm64 .
+            --platform linux/amd64,linux/arm64v8 .
