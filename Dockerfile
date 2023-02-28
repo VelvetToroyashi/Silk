@@ -1,15 +1,12 @@
 # Build it
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
 
-# https://github.com/moby/moby/issues/34129 for explaination of this
-ARG TARGETARCH=amd64
-ARG amd64=x64
-ENV arm64=arm64
 WORKDIR /Silk
 COPY . ./
 
-# Really a restore script, oops
 RUN chmod +x ./restore.sh && ./restore.sh 
+
+RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out
 
 # Run it
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/dotnet/aspnet:7.0-alpine

@@ -6,6 +6,3 @@ for i in ./src/*; do
     fi
 done
 
-echo "Compiling for $TARGET_ARCH. This may take a while."
-
-dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out 1> /dev/null
