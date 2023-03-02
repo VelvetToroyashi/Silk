@@ -27,4 +27,4 @@ COPY --from=build /Silk/out .
 
 RUN chmod +x ./Silk
 
-CMD ["./Silk"]
+CMD ["dotnet", "./Silk.dll"]
