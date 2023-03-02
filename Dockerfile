@@ -1,12 +1,21 @@
 # Build it
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+ARG TARGET_PLATFORM
+
+WORKDIR /src
+COPY */*.csproj ./
+COPY ../Directory.Build.props ./
+RUN dotnet restore ./Silk.csproj
+
+RUN if [ "$TARGETPLATFORM" = "linux/arm64 " ] ; then DOTNET_TARGET=linux-musl-arm64 ; else DOTNET_TARGET=linux-musl-x64 ; fi \
+    && echo $DOTNET_TARGET > /tmp/rid
 
 WORKDIR /Silk
 COPY . ./
 
-RUN dotnet restore ./src/Silk/Silk.csproj
 
-RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out --self-contained -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
+
+RUN dotnet publish ./src/Silk/Silk.csproj --no-restore -c Release -o out -r $(cat /tmp/rid) --self-contained -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed
 
 # Run it
 FROM --platform=$TARGETARCH mcr.microsoft.com/dotnet/aspnet:7.0-alpine
