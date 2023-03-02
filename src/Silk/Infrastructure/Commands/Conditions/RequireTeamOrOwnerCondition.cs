@@ -15,10 +15,10 @@ namespace Silk.Commands.Conditions;
 /// </summary>
 public class RequireTeamOrOwnerCondition : ICondition<RequireTeamOrOwnerAttribute>
 {
-    private readonly ICommandContext       _context;
+    private readonly IOperationContext       _context;
     private readonly IDiscordRestOAuth2API _oauth2;
     
-    public RequireTeamOrOwnerCondition(ICommandContext context, IDiscordRestOAuth2API oauth2)
+    public RequireTeamOrOwnerCondition(IOperationContext context, IDiscordRestOAuth2API oauth2)
     {
         _context = context;
         _oauth2  = oauth2;
