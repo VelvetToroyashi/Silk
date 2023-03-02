@@ -15,12 +15,12 @@ namespace Silk;
 
 public class MessageParser : AbstractTypeParser<IMessage>
 {
-    private readonly ICommandContext _context;
+    private readonly IOperationContext _context;
     private readonly IDiscordRestChannelAPI _channels;
     
     private readonly Regex _messageLinkRegex = new(@"^https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/channels\/\d+\/(?<CHANNEL>\d+)\/(?<MESSAGE>\d+)$");
     
-    public MessageParser(ICommandContext context, IDiscordRestChannelAPI channels)
+    public MessageParser(IOperationContext context, IDiscordRestChannelAPI channels)
     {
         _context = context;
         _channels = channels;
