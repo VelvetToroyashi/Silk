@@ -73,7 +73,7 @@
         <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.5.0" />
         <PackageReference Update="Moq" Version="4.18.4" />
         <PackageReference Update="NUnit" Version="3.13.3" />
-        <PackageReference Update="NUnit3TestAdapter" Version="4.3.1" />
+        <PackageReference Update="NUnit3TestAdapter" Version="4.4.2" />
         <PackageReference Update="Respawn" Version="6.0.0" />
 
     </ItemGroup>
