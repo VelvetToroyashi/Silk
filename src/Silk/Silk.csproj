@@ -75,7 +75,7 @@
         <PackageReference Include="Remora.Plugins" />
         <PackageReference Include="Remora.Results" />
         <PackageReference Include="Sentry" Version="3.28.1" />
-        <PackageReference Include="Sentry.DiagnosticSource" Version="3.28.1" />
+        <PackageReference Include="Sentry.DiagnosticSource" Version="3.29.1" />
         <PackageReference Include="Sentry.Extensions.Logging" Version="3.28.1" />
         <PackageReference Include="Sentry.Serilog" Version="3.28.1" />
         <PackageReference Include="Serilog" />
