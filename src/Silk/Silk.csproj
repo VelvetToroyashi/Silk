@@ -31,7 +31,7 @@
     <ItemGroup>
         <PackageReference Include="AsyncEnumerator" />
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.8.5" />
+        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.8.6" />
         <PackageReference Include="FuzzySharp" />
         <PackageReference Include="Humanizer" />
         <PackageReference Include="JetBrains.Annotations" />
