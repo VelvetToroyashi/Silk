@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.8.8" />
+        <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.9.0" />
         <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="7.0.0" />
         <PackageReference Include="Mapster" Version="7.3.0" />
         <PackageReference Include="Mapster.DependencyInjection" Version="1.0.0" />
